@@ -10,6 +10,25 @@
 # See /LICENSE for more information.
 #
 
-# Modify default IP
-sed -i 's/192.168.1.1/192.168.6.1/g' package/base-files/files/bin/config_generate
+#主机变量
+WRT_IP="10.0.0.1"
+WRT_NAME="AX6000"
+CFG_FILE="./package/base-files/files/bin/config_generate"
 
+#修改默认IP地址 修改默认主机名
+sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
+sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
+
+#wifi相关变量
+WIFI_FILE="./package/mtk/applications/mtwifi-cfg/files/mtwifi.sh"
+WIFI_SSID="Ax6000"
+WIFI_PASS="cw010203"
+
+#修改WIFI信道自动 WIFI名称 修改WIFI加密 修改WIFI密码
+sed -i "s/channel=.*/channel='auto'/g" $WIFI_FILE
+sed -i "s/ImmortalWrt/$WIFI_SSID/g" $WIFI_FILE
+sed -i "s/encryption=.*/encryption='sae-mixed'/g" $WIFI_FILE
+sed -i "/set wireless.default_\${dev}.encryption='sae-mixed'/a \\\t\t\t\t\t\set wireless.default_\${dev}.key='$WIFI_PASS'" $WIFI_FILE
+
+# 512布局
+sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7986a-xiaomi-redmi-router-ax6000.dts
