@@ -31,8 +31,13 @@ sed -i "s/encryption=.*/encryption='sae-mixed'/g" $WIFI_FILE
 sed -i "/set wireless.default_\${dev}.encryption='sae-mixed'/a \\\t\t\t\t\t\set wireless.default_\${dev}.key='$WIFI_PASS'" $WIFI_FILE
 
 # 512布局
+# 24.10-5.4内核：
+# sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7986a-xiaomi-redmi-router-ax6000.dts
 # 24.10-6.6内核：名字看似是ubootmod，实则做了分区修改可以uboot放心刷入
 sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
 
-# 24.10-5.4内核：
-# sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7986a-xiaomi-redmi-router-ax6000.dts
+# 常用软件
+git clone https://github.com/sirpdboy/luci-app-taskplan package/luci-app-taskplan
+sed -i 's/control/services/g' package/luci-app-taskplan/luci-app-taskplan/luasrc/controller/taskplan.lua
+sed -i 's/control/services/g' package/luci-app-taskplan/luci-app-taskplan/luasrc/view/taskplan/log.htm
+
