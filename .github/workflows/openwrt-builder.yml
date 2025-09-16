@@ -1,14 +1,5 @@
-#
-# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
-#
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
-#
-# https://github.com/P3TERX/Actions-OpenWrt
-# Description: Build OpenWrt using GitHub Actions
-#
-###############改名字##############
 name: 开始编译
+
 on:
   repository_dispatch:
   workflow_dispatch:
@@ -40,6 +31,15 @@ jobs:
     - name: 检查项目分支
       uses: actions/checkout@main
 
+    - name: 释放磁盘空间
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /usr/local/share/boost
+        sudo docker image prune -af
+        df -hT
+
     - name: 初始化编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -66,39 +66,24 @@ jobs:
     - name: 检查缓存
       id: check-cache
       if: env.WRT_TEST != 'true'
-      uses: actions/cache@main
+      uses: actions/cache@v3
       with:
-        key: openwrt-24.10-ax6000-${{ hashFiles('openwrt/.config') }}
-        restore-keys: openwrt-24.10-ax6000-
+        key: openwrt-${{ env.REPO_BRANCH }}-ax6000-${{ hashFiles('openwrt/.config') }}
+        restore-keys: openwrt-${{ env.REPO_BRANCH }}-ax6000-
         path: |
-          ./mnt/build_wrt/.ccache
-          ./mnt/build_wrt/staging_dir/host*
-          ./mnt/build_wrt/staging_dir/tool*
+          /mnt/build_wrt/openwrt/.ccache
+          /mnt/build_wrt/openwrt/staging_dir/host
+          /mnt/build_wrt/openwrt/staging_dir/toolchain
 
-    - name: 更新缓存
-      if: env.WRT_TEST != 'true'
+    - name: 清理失效缓存
+      if: steps.check-cache.outputs.cache-hit != 'true'
       run: |
-          if [ -d "./mnt/build_wrt/staging_dir" ]; then
-            find "./mnt/build_wrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
-              find "$DIR" -type f -exec touch {} +
-            done
+        CACHE_LIST=$(gh cache list --key "openwrt-${REPO_BRANCH}-ax6000-" | cut -f 1)
+        for CACHE_KEY in $CACHE_LIST; do
+          gh cache delete $CACHE_KEY
+        done
+        echo "缓存清理完成!"
 
-            mkdir -p ./mnt/build_wrt/tmp && echo "1" > ./mnt/build_wrt/tmp/.build
-
-            echo "toolchain skiped done!"
-          else
-            echo "缓存丢失!"
-          fi
-
-          if ${{steps.check-cache.outputs.cache-hit != 'true'}}; then
-            CACHE_LIST=$(gh cache list --key "$WRT_CONFIG-$WRT_VER" | cut -f 1)
-            for CACHE_KEY in $CACHE_LIST; do
-              gh cache delete $CACHE_KEY
-            done
-
-            echo "缓存清理完成!"
-          fi
-         
     - name: 加载feeds.conf.default & DIY_P1_SH
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
@@ -139,6 +124,10 @@ jobs:
       id: compile
       run: |
         cd openwrt
+        echo 'CONFIG_CCACHE=y' >> .config
+        export CCACHE_DIR=/mnt/build_wrt/openwrt/.ccache
+        export CCACHE_COMPRESS=1
+        export CCACHE_MAXSIZE=2G
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 V=s
         echo "COMPILE_STATUS=success" >> $GITHUB_ENV
@@ -150,11 +139,11 @@ jobs:
       if: always()
       uses: actions/cache@v3
       with:
-        key: openwrt-24.10-${{ hashFiles('openwrt/.config') }}
+        key: openwrt-${{ env.REPO_BRANCH }}-ax6000-${{ hashFiles('openwrt/.config') }}
         path: |
-         /mnt/build_wrt/openwrt/.ccache
-         /mnt/build_wrt/openwrt/staging_dir/host
-         /mnt/build_wrt/openwrt/staging_dir/toolchain
+          /mnt/build_wrt/openwrt/.ccache
+          /mnt/build_wrt/openwrt/staging_dir/host
+          /mnt/build_wrt/openwrt/staging_dir/toolchain
         
     - name: 查看磁盘使用情况
       if: (!cancelled())
@@ -188,7 +177,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
             自用红米AX6000改512版, padavanonly大佬闭源驱动版固件
-            基于openwrt-24.10, kernel 6.6, 编译时间: ${{ env.FILE_DATE }}
+            基于${{ env.REPO_BRANCH }}, 编译时间: ${{ env.FILE_DATE }}
             
             Default IP: 10.0.0.1
             Default Wi-Fi: AX6000
