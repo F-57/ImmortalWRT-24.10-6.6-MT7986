@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 ###############改名字##############
-name: 237大佬_24.10-6.6
+name: 开始编译
 on:
   repository_dispatch:
   workflow_dispatch:
@@ -40,59 +40,50 @@ jobs:
     - name: 检查项目分支
       uses: actions/checkout@main
 
-    - name: Free Disk Space
-      run: |
-        echo "Before cleanup:"
-        df -h
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-        sudo docker image prune -a -f
-        echo "After cleanup:"
-        df -h
-
     - name: 初始化编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-        sudo docker image prune --all --force
-        sudo -E apt-get -qq update
-        sudo -E apt-get -qq install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
-        sudo timedatectl set-timezone "$TZ"
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
+        sudo -E apt -yqq update
+        sudo -E apt -yqq full-upgrade
+        sudo -E apt -yqq autoremove --purge
+        sudo -E apt -yqq autoclean
+        sudo -E apt -yqq clean
+        sudo -E apt -yqq install dos2unix libfuse-dev jq
+        sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+        sudo -E systemctl daemon-reload
+        sudo -E timedatectl set-timezone "Asia/Shanghai"
+        sudo mkdir -p /mnt/build_wrt
+        sudo chown $USER:$GROUPS /mnt/build_wrt
 
     - name: 下载固件源码
-      working-directory: /workdir
+      working-directory: /mnt/build_wrt
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /mnt/build_wrt/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: 检查缓存
       id: check-cache
       if: env.WRT_TEST != 'true'
       uses: actions/cache@main
       with:
-        key: openwrt-21.02-ax6000-${{ hashFiles('openwrt/.config') }}
-        restore-keys: openwrt-21.02-ax6000-
+        key: openwrt-24.10-ax6000-${{ hashFiles('openwrt/.config') }}
+        restore-keys: openwrt-24.10-ax6000-
         path: |
-          ./workdir/.ccache
-          ./workdir/staging_dir/host*
-          ./workdir/staging_dir/tool*
+          ./mnt/build_wrt/.ccache
+          ./mnt/build_wrt/staging_dir/host*
+          ./mnt/build_wrt/staging_dir/tool*
 
     - name: 更新缓存
       if: env.WRT_TEST != 'true'
       run: |
-          if [ -d "./workdir/staging_dir" ]; then
-            find "./workdir/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
+          if [ -d "./mnt/build_wrt/staging_dir" ]; then
+            find "./mnt/build_wrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
               find "$DIR" -type f -exec touch {} +
             done
 
-            mkdir -p ./workdir/tmp && echo "1" > ./workdir/tmp/.build
+            mkdir -p ./mnt/build_wrt/tmp && echo "1" > ./mnt/build_wrt/tmp/.build
 
             echo "toolchain skiped done!"
           else
@@ -159,11 +150,11 @@ jobs:
       if: always()
       uses: actions/cache@v3
       with:
-        key: openwrt-21.02-${{ hashFiles('openwrt/.config') }}
+        key: openwrt-24.10-${{ hashFiles('openwrt/.config') }}
         path: |
-         /workdir/openwrt/.ccache
-         /workdir/openwrt/staging_dir/host
-         /workdir/openwrt/staging_dir/toolchain
+         /mnt/build_wrt/openwrt/.ccache
+         /mnt/build_wrt/openwrt/staging_dir/host
+         /mnt/build_wrt/openwrt/staging_dir/toolchain
         
     - name: 查看磁盘使用情况
       if: (!cancelled())
@@ -196,17 +187,14 @@ jobs:
         allowUpdates: true
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
-            自用红米AX6000改512版, hanwckf大佬闭源驱动版固件
-            基于openwrt-21.02, kernel 5.4, 编译时间: ${{ env.FILE_DATE }}
+            自用红米AX6000改512版, padavanonly大佬闭源驱动版固件
+            基于openwrt-24.10, kernel 6.6, 编译时间: ${{ env.FILE_DATE }}
             
             Default IP: 10.0.0.1
             Default Wi-Fi: AX6000
             Default username: root
             Default password: 无
             
-            插件列表： 
-              ├ eqos-mtk+openclash+mosdns+lucky+airconnect+wireguard
-        
     - name: 删除旧版本
       uses: dev-drprasad/delete-older-releases@master
       if: env.ORGANIZE_STATUS == 'success' && !cancelled()
