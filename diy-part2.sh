@@ -37,12 +37,10 @@ sed -i "/set wireless.default_\${dev}.encryption='sae-mixed'/a \\\t\t\t\t\t\set 
 sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
 
 # Theme
-git clone https://github.com/SAENE/luci-theme-design package/luci-theme-design
 git clone https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
 
 # 主题高级设置
 git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
-
 
 # 任务设置
 #git clone https://github.com/sirpdboy/luci-app-taskplan package/luci-app-taskplan
@@ -90,7 +88,6 @@ echo -e "msgstr \"聚合网盘\"" >> package/openlist/luci-app-openlist2/po/zh_H
 
 # 软件包与配置
 echo "CONFIG_CCACHE=y" >> .config
-echo "CONFIG_PACKAGE_luci-theme-design=y" >> .config
 echo "CONFIG_PACKAGE_luci-theme-kucat=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-advancedplus=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
