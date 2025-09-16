@@ -9,15 +9,6 @@
 #
 ###############改名字##############
 name: 237大佬_24.10-6.6
-  run: |
-    echo "Before cleanup:"
-    df -h
-    sudo rm -rf /usr/share/dotnet
-    sudo rm -rf /usr/local/lib/android
-    sudo rm -rf /opt/ghc
-    sudo docker image prune -a -f
-    echo "After cleanup:"
-    df -h
 on:
   repository_dispatch:
   workflow_dispatch:
@@ -48,6 +39,17 @@ jobs:
     steps:
     - name: 检查项目分支
       uses: actions/checkout@main
+
+    - name: Free Disk Space
+      run: |
+        echo "Before cleanup:"
+        df -h
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo docker image prune -a -f
+        echo "After cleanup:"
+        df -h
 
     - name: 初始化编译环境
       env:
