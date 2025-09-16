@@ -43,9 +43,9 @@ git clone https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
 # 主题高级设置
 git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
 
-# 常用软件
+
 # 任务设置
-git clone https://github.com/sirpdboy/luci-app-taskplan package/luci-app-taskplan
+#git clone https://github.com/sirpdboy/luci-app-taskplan package/luci-app-taskplan
 
 # 安装 mosdns
 rm -rf feeds/packages/lang/golang
@@ -85,15 +85,14 @@ echo -e "\nmsgid \"OpenList\"" >> package/openlist/luci-app-openlist2/po/zh_Hans
 echo -e "msgstr \"聚合网盘\"" >> package/openlist/luci-app-openlist2/po/zh_Hans/openlist2.po
 
 # 更改菜单
-sed -i 's/control/services/g' package/luci-app-taskplan/luci-app-taskplan/luasrc/controller/taskplan.lua
-sed -i 's/control/services/g' package/luci-app-taskplan/luci-app-taskplan/luasrc/view/taskplan/log.htm
+#sed -i 's/control/services/g' package/luci-app-taskplan/luci-app-taskplan/luasrc/controller/taskplan.lua
+#sed -i 's/control/services/g' package/luci-app-taskplan/luci-app-taskplan/luasrc/view/taskplan/log.htm
 
 # 软件包与配置
 echo "CONFIG_CCACHE=y" >> .config
 echo "CONFIG_PACKAGE_luci-theme-design=y" >> .config
 echo "CONFIG_PACKAGE_luci-theme-kucat=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-advancedplus=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-taskplan=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> .config
