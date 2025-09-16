@@ -96,3 +96,4 @@ echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-lucky=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-airconnect=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
