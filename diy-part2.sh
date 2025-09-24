@@ -42,8 +42,8 @@ git clone https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
 # 主题高级设置
 git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
 
-# 任务设置
-#git clone https://github.com/sirpdboy/luci-app-taskplan package/luci-app-taskplan
+# adguardhome
+git clone https://github.com/kongfl888/luci-app-adguardhome package/luci-app-adguardhome
 
 # 安装 mosdns
 rm -rf feeds/packages/lang/golang
@@ -100,3 +100,4 @@ echo "CONFIG_PACKAGE_luci-app-lucky=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-airconnect=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
