@@ -85,19 +85,18 @@ echo -e "msgstr \"聚合网盘\"" >> package/openlist/luci-app-openlist2/po/zh_H
 echo -e "\nmsgid \"UPnP IGD & PCP\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
 echo -e "msgstr \"即插即用\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
 
-# 更改菜单
-#sed -i 's/control/services/g' package/luci-app-taskplan/luci-app-taskplan/luasrc/controller/taskplan.lua
-#sed -i 's/control/services/g' package/luci-app-taskplan/luci-app-taskplan/luasrc/view/taskplan/log.htm
+echo -e "\nmsgid \"AdGuardHome\"" >> package/luci-app-adguardhome/luci-app-adguardhome/po/zh_Hans/adguardhome.po
+echo -e "msgstr \"DNS过滤\"" >> package/luci-app-adguardhome/luci-app-adguardhome/po/zh_Hans/adguardhome.po
 
 # 软件包与配置
 echo "CONFIG_CCACHE=y" >> .config
 echo "CONFIG_PACKAGE_luci-theme-kucat=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-advancedplus=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
+#echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> .config
+#echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-lucky=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-airconnect=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> .config
+#echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
