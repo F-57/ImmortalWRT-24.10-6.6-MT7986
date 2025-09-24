@@ -43,7 +43,7 @@ git clone https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
 git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
 
 # adguardhome
-git clone https://github.com/kongfl888/luci-app-adguardhome package/luci-app-adguardhome
+git clone https://github.com/sirpdboy/luci-app-adguardhome package/luci-app-adguardhome
 
 # 安装 mosdns
 rm -rf feeds/packages/lang/golang
