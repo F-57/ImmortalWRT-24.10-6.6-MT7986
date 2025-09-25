@@ -43,7 +43,7 @@ git clone https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
 git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
 
 # adguardhome
-git clone https://github.com/sirpdboy/luci-app-adguardhome package/luci-app-adguardhome
+git clone https://github.com/F-57/luci-app-adguardhome package/luci-app-adguardhome
 
 # 安装 mosdns
 rm -rf feeds/packages/lang/golang
@@ -84,9 +84,6 @@ echo -e "msgstr \"聚合网盘\"" >> package/openlist/luci-app-openlist2/po/zh_H
 
 echo -e "\nmsgid \"UPnP IGD & PCP\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
 echo -e "msgstr \"即插即用\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
-
-echo -e "\nmsgid \"AdGuardHome\"" >> package/luci-app-adguardhome/luci-app-adguardhome/po/zh_Hans/adguardhome.po
-echo -e "msgstr \"DNS过滤\"" >> package/luci-app-adguardhome/luci-app-adguardhome/po/zh_Hans/adguardhome.po
 
 # 软件包与配置
 echo "CONFIG_CCACHE=y" >> .config
