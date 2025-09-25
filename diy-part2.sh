@@ -38,13 +38,12 @@ sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/
 
 # Theme
 git clone https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
-
+# 网速测试
+git clone https://github.com/sirpdboy/luci-app-netspeedtest package/netspeedtest
 # 主题高级设置
 git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
-
 # adguardhome
 git clone https://github.com/F-57/luci-app-adguardhome package/luci-app-adguardhome
-
 # 安装 mosdns
 rm -rf feeds/packages/lang/golang
 rm -rf feeds/packages/net/mosdns
@@ -54,16 +53,12 @@ rm -rf package/feeds/packages/v2ray-geodata
 git clone https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
 git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
-
 # 安装 luci-app-openlist2 
 git clone https://github.com/sbwml/luci-app-openlist2 package/openlist
-
 # 安装隔空播放luci-app-airconnect
 git clone https://github.com/sbwml/luci-app-airconnect package/airconnect
-
 # 安装lucky
 git clone https://github.com/sirpdboy/luci-app-lucky package/lucky
-
 # 安装 OpenClash
 git clone --depth 1 https://github.com/vernesong/openclash.git OpenClash
 rm -rf feeds/luci/applications/luci-app-openclash
@@ -97,3 +92,4 @@ echo "CONFIG_PACKAGE_luci-app-airconnect=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-netspeedtest=y" >> .config
