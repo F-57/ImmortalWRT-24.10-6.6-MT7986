@@ -91,7 +91,7 @@ echo -e "msgstr \"DNS过滤\"" >> package/luci-app-adguardhome/luci-app-adguardh
 # 软件包与配置
 echo "CONFIG_CCACHE=y" >> .config
 echo "CONFIG_PACKAGE_luci-theme-kucat=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-advancedplus=y" >> .config
+#echo "CONFIG_PACKAGE_luci-app-advancedplus=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> .config
