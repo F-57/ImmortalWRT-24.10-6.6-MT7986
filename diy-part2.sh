@@ -95,4 +95,4 @@ echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-netspeedtest=y" >> .config
+#echo "CONFIG_PACKAGE_luci-app-netspeedtest=y" >> .config
