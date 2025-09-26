@@ -38,6 +38,7 @@ sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/
 
 # Theme
 rm -rf feeds/luci/themes/luci-theme-argon
+rm -rf feeds/luci/applications/luci-app-argon-config
 git clone https://github.com/sbwml/luci-theme-argon -b openwrt-24.10 package/argon
 git clone https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
 # 网速测试
