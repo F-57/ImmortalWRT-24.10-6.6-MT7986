@@ -37,6 +37,8 @@ sed -i "/set wireless.default_\${dev}.encryption='sae-mixed'/a \\\t\t\t\t\t\set 
 sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
 
 # Theme
+rm -rf feeds/luci/themes/luci-theme-argon
+git clone https://github.com/sbwml/luci-theme-argon -b openwrt-24.10 package/argon
 git clone https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
 # 网速测试
 git clone https://github.com/sirpdboy/luci-app-netspeedtest package/netspeedtest
@@ -82,6 +84,7 @@ echo -e "msgstr \"即插即用\"" >> feeds/luci/applications/luci-app-upnp/po/zh
 
 # 软件包与配置
 echo "CONFIG_CCACHE=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
 #echo "CONFIG_PACKAGE_luci-theme-kucat=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-advancedplus=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
