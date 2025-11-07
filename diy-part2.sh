@@ -83,6 +83,8 @@ echo -e "msgstr \"聚合网盘\"" >> package/openlist/luci-app-openlist2/po/zh_H
 echo -e "\nmsgid \"UPnP IGD & PCP\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
 echo -e "msgstr \"即插即用\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
 
+echo -e "\nmsgid \"Docker\"" >> package/feeds/luci/luci-app-dockerman/po/zh_Hans/dockerman.po
+echo -e "msgstr \"容器\"" >> package/feeds/luci/luci-app-dockerman/po/zh_Hans/dockerman.po
 # 软件包与配置
 echo "CONFIG_CCACHE=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
@@ -96,4 +98,5 @@ echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-dockerman=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-netspeedtest=y" >> .config
