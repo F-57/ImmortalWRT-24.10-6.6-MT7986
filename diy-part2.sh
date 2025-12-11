@@ -87,6 +87,7 @@ echo -e "\nmsgid \"Docker\"" >> package/feeds/luci/luci-app-dockerman/po/zh_Hans
 echo -e "msgstr \"容器\"" >> package/feeds/luci/luci-app-dockerman/po/zh_Hans/dockerman.po
 # 软件包与配置
 echo "CONFIG_CCACHE=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-argon=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
 #echo "CONFIG_PACKAGE_luci-theme-kucat=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-advancedplus=y" >> .config
