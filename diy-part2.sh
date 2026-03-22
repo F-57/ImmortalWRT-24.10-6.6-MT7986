@@ -68,17 +68,23 @@ git clone https://github.com/sbwml/luci-app-airconnect package/airconnect
 # 安装lucky
 git clone https://github.com/sirpdboy/luci-app-lucky package/lucky
 
-# 安装 OpenClash
+# 安装OpenClash
 git clone --depth 1 https://github.com/vernesong/openclash.git OpenClash
 rm -rf feeds/luci/applications/luci-app-openclash
 mv OpenClash/luci-app-openclash feeds/luci/applications/luci-app-openclash
 
+#网络向导
+git clone https://github.com/sirpdboy/luci-app-wizard package/luci-app-wizard
+ 
 # 更改菜单名字
 echo -e "\nmsgid \"MosDNS\"" >> package/mosdns/luci-app-mosdns/po/zh_Hans/mosdns.po
 echo -e "msgstr \"转发分流\"" >> package/mosdns/luci-app-mosdns/po/zh_Hans/mosdns.po
 
 echo -e "\nmsgid \"OpenList\"" >> package/openlist/luci-app-openlist2/po/zh_Hans/openlist2.po
 echo -e "msgstr \"聚合网盘\"" >> package/openlist/luci-app-openlist2/po/zh_Hans/openlist2.po
+
+echo -e "\nmsgid \"Netwizard\"" >> package/luci-app-netwizard/luci-app-netwizard/po/zh_Hans/netwizard.po
+echo -e "msgstr \"向导\"" >> package/luci-app-netwizard/luci-app-netwizard/po/zh_Hans/netwizard.po
 
 echo -e "\nmsgid \"Lucky\"" >> package/lucky/luci-app-lucky/po/zh_Hans/lucky.po
 echo -e "msgstr \"大吉大利\"" >> package/lucky/luci-app-lucky/po/zh_Hans/lucky.po
@@ -103,14 +109,9 @@ echo "CONFIG_PACKAGE_luci-theme-aurora=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-dockerman=y" >> .config
 
-echo "CONFIG_PACKAGE_luci-app-cloudflared=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
-#echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> .config
-#echo "CONFIG_PACKAGE_luci-app-lucky=y" >> .config
-
-
-
-
-
+echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-lucky=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-wizard=y" >> .config
