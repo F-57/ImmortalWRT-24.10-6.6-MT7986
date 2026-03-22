@@ -101,7 +101,7 @@ echo -e "msgstr \"容器\"" >> package/feeds/luci/luci-app-dockerman/po/zh_Hans/
 # 软件包与配置
 echo "CONFIG_CCACHE=y" >> .config
 
-#echo "CONFIG_PACKAGE_luci-app-argon=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-argon=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
 echo "CONFIG_PACKAGE_luci-theme-kucat=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-kucat-config=y" >> .config
@@ -115,4 +115,4 @@ echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-lucky=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-netwizard=y" >> .config
+#echo "CONFIG_PACKAGE_luci-app-netwizard=y" >> .config
