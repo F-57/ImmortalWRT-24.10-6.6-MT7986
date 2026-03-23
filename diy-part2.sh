@@ -71,7 +71,7 @@ rm -rf feeds/luci/applications/luci-app-openclash
 mv OpenClash/luci-app-openclash feeds/luci/applications/luci-app-openclash
 
 #网络向导
-git clone https://github.com/sirpdboy/luci-app-netwizard package/luci-app-netwizard
+#git clone https://github.com/sirpdboy/luci-app-netwizard package/luci-app-netwizard
  
 # 更改菜单名字
 echo -e "\nmsgid \"KuCat Config\"" >> package/luci-app-kucat-config/po/zh_Hans/kucat-config.po
