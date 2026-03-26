@@ -38,7 +38,7 @@ jobs:
 
     - name: Initialization Environment
       env:
-      DEBIAN_FRONTEND: noninteractive
+       DEBIAN_FRONTEND: noninteractive
       run: |
         sudo -E apt -yqq purge firefox
         sudo -E apt -yqq update
