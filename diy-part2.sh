@@ -34,14 +34,12 @@ sed -i "/set wireless.default_\${dev}.encryption='sae-mixed'/a \\\t\t\t\t\t\set 
 # 24.10-5.4内核：
 # sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7986a-xiaomi-redmi-router-ax6000.dts
 # 24.10-6.6内核：名字看似是ubootmod，实则做了分区修改可以uboot放心刷入
-sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
+# sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
 
 # Theme
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
-git clone https://github.com/sbwml/luci-theme-argon -b openwrt-24.10 package/argon
-git clone https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
-git clone https://github.com/sirpdboy/luci-app-kucat-config package/luci-app-kucat-config
+git clone https://github.com/sbwml/luci-theme-argon -b openwrt-25.12 package/argon
 
 # adguardhome
 git clone https://github.com/F-57/luci-app-adguardhome package/luci-app-adguardhome
@@ -71,11 +69,11 @@ rm -rf feeds/luci/applications/luci-app-openclash
 mv OpenClash/luci-app-openclash feeds/luci/applications/luci-app-openclash
 
 #网络向导
-#git clone https://github.com/sirpdboy/luci-app-netwizard package/luci-app-netwizard
+git clone https://github.com/sirpdboy/luci-app-netwizard package/luci-app-netwizard
  
 # 更改菜单名字
-echo -e "\nmsgid \"KuCat Config\"" >> package/luci-app-kucat-config/po/zh_Hans/kucat-config.po
-echo -e "msgstr \"主题设置\"" >> package/luci-app-kucat-config/po/zh_Hans/kucat-config.po
+#echo -e "\nmsgid \"KuCat Config\"" >> package/luci-app-kucat-config/po/zh_Hans/kucat-config.po
+#echo -e "msgstr \"主题设置\"" >> package/luci-app-kucat-config/po/zh_Hans/kucat-config.po
 
 echo -e "\nmsgid \"MosDNS\"" >> package/mosdns/luci-app-mosdns/po/zh_Hans/mosdns.po
 echo -e "msgstr \"转发分流\"" >> package/mosdns/luci-app-mosdns/po/zh_Hans/mosdns.po
@@ -92,27 +90,18 @@ echo -e "msgstr \"大吉大利\"" >> package/lucky/luci-app-lucky/po/zh_Hans/luc
 echo -e "\nmsgid \"OpenClash\"" >> feeds/luci/applications/luci-app-openclash/po/zh-cn/openclash.zh-cn.po
 echo -e "msgstr \"科学上网\"" >> feeds/luci/applications/luci-app-openclash/po/zh-cn/openclash.zh-cn.po
 
-echo -e "\nmsgid \"UPnP IGD & PCP\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
-echo -e "msgstr \"即插即用\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
-
-echo -e "\nmsgid \"Docker\"" >> package/feeds/luci/luci-app-dockerman/po/zh_Hans/dockerman.po
-echo -e "msgstr \"容器\"" >> package/feeds/luci/luci-app-dockerman/po/zh_Hans/dockerman.po
+#echo -e "\nmsgid \"UPnP IGD & PCP\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
+#echo -e "msgstr \"即插即用\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
 
 # 软件包与配置
 echo "CONFIG_CCACHE=y" >> .config
 
 echo "CONFIG_PACKAGE_luci-app-argon=y" >> .config
-#echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
-echo "CONFIG_PACKAGE_luci-theme-kucat=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-kucat-config=y" >> .config
-#echo "CONFIG_PACKAGE_luci-theme-aurora=y" >> .config
-
-echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
-#echo "CONFIG_PACKAGE_luci-app-dockerman=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
 
 echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-lucky=y" >> .config
-#echo "CONFIG_PACKAGE_luci-app-netwizard=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-netwizard=y" >> .config
