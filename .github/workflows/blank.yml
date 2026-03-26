@@ -1,0 +1,143 @@
+name: AX6000 固件编译（终极版）
+
+on:
+workflow_dispatch:
+inputs:
+ssh:
+description: 'SSH调试'
+required: false
+default: 'false'
+
+env:
+REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase
+REPO_BRANCH: 25.12-dev
+CONFIG_FILE: .config
+DIY_P1_SH: diy-part1.sh
+DIY_P2_SH: diy-part2.sh
+TZ: Asia/Shanghai
+
+jobs:
+build:
+runs-on: ubuntu-22.04
+
+```
+steps:
+- name: 拉取仓库
+  uses: actions/checkout@v4
+
+- name: 释放磁盘空间
+  run: |
+    sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /usr/local/.ghcup /usr/lib/jvm
+    sudo docker image prune -af
+    df -hT
+
+- name: 初始化环境
+  run: |
+    sudo apt update -y
+    sudo apt install -y dos2unix jq libfuse-dev
+    sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+    sudo timedatectl set-timezone "$TZ"
+    mkdir -p /mnt/build_wrt
+    sudo chown $USER:$GROUPS /mnt/build_wrt
+
+- name: 克隆源码
+  working-directory: /mnt/build_wrt
+  run: |
+    git clone $REPO_URL -b $REPO_BRANCH openwrt
+    ln -sf /mnt/build_wrt/openwrt $GITHUB_WORKSPACE/openwrt
+
+- name: 缓存加速
+  uses: actions/cache@v4
+  with:
+    path: |
+      /mnt/build_wrt/openwrt/.ccache
+      /mnt/build_wrt/openwrt/staging_dir/host
+      /mnt/build_wrt/openwrt/staging_dir/toolchain
+    key: ax6000-${{ env.REPO_BRANCH }}-${{ hashFiles('openwrt/.config','diy-part*.sh') }}
+
+- name: 加载 feeds & DIY1
+  run: |
+    chmod +x $DIY_P1_SH
+    cd openwrt
+    $GITHUB_WORKSPACE/$DIY_P1_SH
+
+- name: 更新 feeds（固定稳定）
+  run: |
+    cd openwrt
+    ./scripts/feeds update -a -f
+    ./scripts/feeds install -a
+
+- name: 加载配置 & DIY2
+  run: |
+    mv $CONFIG_FILE openwrt/.config
+    chmod +x $DIY_P2_SH
+    cd openwrt
+    $GITHUB_WORKSPACE/$DIY_P2_SH
+
+- name: 强制AX6000单设备
+  run: |
+    cd openwrt
+    sed -i 's/CONFIG_TARGET_MULTI_PROFILE=y/# CONFIG_TARGET_MULTI_PROFILE is not set/' .config
+    grep xiaomi_redmi-router-ax6000-ubootmod .config
+
+- name: SSH调试
+  uses: P3TERX/ssh2actions@v1.0.0
+  if: github.event.inputs.ssh == 'true'
+
+- name: 下载依赖
+  run: |
+    cd openwrt
+    make defconfig
+    make download -j$(nproc)
+    find dl -size -1024c -delete
+
+- name: 编译固件
+  run: |
+    cd openwrt
+    echo 'CONFIG_CCACHE=y' >> .config
+    export CCACHE_DIR=/mnt/build_wrt/openwrt/.ccache
+    export CCACHE_MAXSIZE=2G
+
+    echo "开始编译..."
+    make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
+
+    echo "DEVICE_NAME=AX6000-512M" >> $GITHUB_ENV
+    echo "FILE_DATE=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_ENV
+
+- name: 整理固件
+  run: |
+    cd openwrt/bin/targets/*/*
+    rm -rf packages
+    rename 's/^/AX6000-512M_/' *.bin || true
+    echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+
+- name: 上传Artifact
+  uses: actions/upload-artifact@v4
+  with:
+    name: AX6000_firmware
+    path: ${{ env.FIRMWARE }}
+
+- name: 发布Release
+  uses: ncipollo/release-action@v1
+  with:
+    tag: AX6000-${{ env.FILE_DATE }}
+    artifacts: ${{ env.FIRMWARE }}/*
+    allowUpdates: true
+    token: ${{ secrets.GITHUB_TOKEN }}
+    body: |
+      AX6000 专用512M固件
+      分支: ${{ env.REPO_BRANCH }}
+      编译时间: ${{ env.FILE_DATE }}
+
+      默认IP: 10.0.0.1
+      用户名: root
+      密码: 无
+
+- name: 清理旧版本
+  uses: dev-drprasad/delete-older-releases@v0.3.0
+  with:
+    keep_latest: 2
+    delete_tags: true
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
