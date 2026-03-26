@@ -1,196 +1,135 @@
-name: 开始编译
+name: AX6000 固件编译（终极版）
 
-于:
-  repository_dispatch:
-  workflow_dispatch:
-    inputs:
-      ssh:
-        description: 'SSH connection to Actions'
-        required: false
-        默认: 'false'
-#  schedule:
-#    - cron: 0 16 * * *
+on:
+workflow_dispatch:
+inputs:
+ssh:
+description: 'SSH调试'
+required: false
+default: 'false'
 
 env:
-  REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase
-  REPO_BRANCH: 25.12-dev
-  FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: .config
-  DIY_P1_SH: diy-part1.sh
-  DIY_P2_SH: diy-part2.sh
-  SSH_ACTIONS: false
-  UPLOAD_FIRMWARE: true
-  UPLOAD_RELEASE: true
-  TZ: Asia/Shanghai
+REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase
+REPO_BRANCH: 25.12-dev
+CONFIG_FILE: .config
+DIY_P1_SH: diy-part1.sh
+DIY_P2_SH: diy-part2.sh
+TZ: Asia/Shanghai
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
-    
-    steps:
-    - name: 检查项目分支
-      uses: actions/checkout@main
+build:
+runs-on: ubuntu-22.04
 
-    - name: 释放磁盘空间
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /usr/local/share/boost
-        sudo docker image prune -af
-        df -hT
+steps:
+- name: 拉取仓库
+  uses: actions/checkout@v4
 
-    - name: 初始化编译环境
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo -E apt -yqq update
-        sudo -E apt -yqq full-upgrade
-        sudo -E apt -yqq autoremove --purge
-        sudo -E apt -yqq autoclean
-        sudo -E apt -yqq clean
-        sudo -E apt -yqq install dos2unix libfuse-dev jq
-        sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
-        sudo -E systemctl daemon-reload
-        sudo -E timedatectl set-timezone "Asia/Shanghai"
-        sudo mkdir -p /mnt/build_wrt
-        sudo chown $USER:$GROUPS /mnt/build_wrt
+- name: 释放磁盘空间
+  run: |
+    sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /usr/local/.ghcup /usr/lib/jvm
+    sudo docker image prune -af
+    df -hT
 
-    - name: 下载固件源码
-      working-directory: /mnt/build_wrt
-      run: |
-        df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /mnt/build_wrt/openwrt $GITHUB_WORKSPACE/openwrt
+- name: 初始化环境
+  run: |
+    sudo apt update -y
+    sudo apt install -y dos2unix jq libfuse-dev
+    sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+    sudo timedatectl set-timezone "$TZ"
+    mkdir -p /mnt/build_wrt
+    sudo chown $USER:$GROUPS /mnt/build_wrt
 
-    - name: 检查缓存
-      id: check-cache
-      if: env.WRT_TEST != 'true'
-      uses: actions/cache@v3
-      with:
-        key: openwrt-${{ env.REPO_BRANCH }}-ax6000-${{ hashFiles('openwrt/.config') }}
-        restore-keys: openwrt-${{ env.REPO_BRANCH }}-ax6000-
-        path: |
-          /mnt/build_wrt/openwrt/.ccache
-          /mnt/build_wrt/openwrt/staging_dir/host
-          /mnt/build_wrt/openwrt/staging_dir/toolchain
+- name: 克隆源码
+  working-directory: /mnt/build_wrt
+  run: |
+    git clone $REPO_URL -b $REPO_BRANCH openwrt
+    ln -sf /mnt/build_wrt/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: 清理失效缓存
-      if: steps.check-cache.outputs.cache-hit != 'true'
-      run: |
-        CACHE_LIST=$(gh cache list --key "openwrt-${REPO_BRANCH}-ax6000-" | cut -f 1)
-        for CACHE_KEY in $CACHE_LIST; do
-          gh cache delete $CACHE_KEY
-        done
-        echo "缓存清理完成!"
+- name: 缓存加速
+  uses: actions/cache@v4
+  with:
+    path: |
+      /mnt/build_wrt/openwrt/.ccache
+      /mnt/build_wrt/openwrt/staging_dir/host
+      /mnt/build_wrt/openwrt/staging_dir/toolchain
+    key: ax6000-${{ env.REPO_BRANCH }}-${{ hashFiles('openwrt/.config','diy-part*.sh') }}
 
-    - name: 加载feeds.conf.default & DIY_P1_SH
-      run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $DIY_P1_SH
-        cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P1_SH
-        
-    - name: 更新 & 安装 feeds
-      run: |
-        cd openwrt
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-      
-    - name: 加载config & DIY_P2_SH
-      run: |
-        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        chmod +x $DIY_P2_SH
-        cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P2_SH
-        
-    - name: SSH链接管理
-      uses: P3TERX/ssh2actions@v1.0.0
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
-      env:
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+- name: 加载 feeds & DIY1
+  run: |
+    chmod +x $DIY_P1_SH
+    cd openwrt
+    $GITHUB_WORKSPACE/$DIY_P1_SH
 
-    - name: 下载安装包
-      id: package
-      run: |
-        cd openwrt
-        make defconfig
-        make download -j$(nproc)
-        find dl -size -1024c -exec ls -l {} \;
-        find dl -size -1024c -exec rm -f {} \;
-        
-    - name: 编译固件
-      id: compile
-      run: |
-        cd openwrt
-        echo 'CONFIG_CCACHE=y' >> .config
-        export CCACHE_DIR=/mnt/build_wrt/openwrt/.ccache
-        export CCACHE_COMPRESS=1
-        export CCACHE_MAXSIZE=2G
-        echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 V=s
-        echo "COMPILE_STATUS=success" >> $GITHUB_ENV
-        echo "mediatek_mt7986_redmi_ax6000" > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "FILE_DATE=$(date +"%y.%-m.%-d")" >> $GITHUB_ENV
+- name: 更新 feeds（固定稳定）
+  run: |
+    cd openwrt
+    ./scripts/feeds update -a -f
+    ./scripts/feeds install -a
 
-    - name: 保存缓存
-      if: always()
-      uses: actions/cache@v3
-      with:
-        key: openwrt-${{ env.REPO_BRANCH }}-ax6000-${{ hashFiles('openwrt/.config') }}
-        path: |
-          /mnt/build_wrt/openwrt/.ccache
-          /mnt/build_wrt/openwrt/staging_dir/host
-          /mnt/build_wrt/openwrt/staging_dir/toolchain
-        
-    - name: 查看磁盘使用情况
-      if: (!cancelled())
-      run: df -hT
+- name: 加载配置 & DIY2
+  run: |
+    mv $CONFIG_FILE openwrt/.config
+    chmod +x $DIY_P2_SH
+    cd openwrt
+    $GITHUB_WORKSPACE/$DIY_P2_SH
 
-    - name: 整理文件并重命名
-      id: organize
-      if: env.COMPILE_STATUS == 'success' && !cancelled()
-      run: |
-        cd openwrt/bin/targets/*/*
-        rm -rf packages
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "ORGANIZE_STATUS=success" >> $GITHUB_ENV
-      
-    - name: 上传固件到 artifact
-      uses: actions/upload-artifact@main
-      if: env.ORGANIZE_STATUS == 'success' && env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-      with:
-        name: OpenWrt_firmware_${{ env.DEVICE_NAME }}
-        path: ${{ env.FIRMWARE }}
+- name: SSH调试
+  uses: P3TERX/ssh2actions@v1.0.0
+  if: github.event.inputs.ssh == 'true'
 
-    - name: 固件发布
-      id: release
-      uses: ncipollo/release-action@main
-      if: env.ORGANIZE_STATUS == 'success' && env.UPLOAD_RELEASE == 'true' && (!cancelled())
-      with:
-        tag: ${{ env.FILE_DATE }}-redmi_ax6000
-        removeArtifacts: false
-        artifacts: ${{ env.FIRMWARE }}/*
-        allowUpdates: true
-        token: ${{ secrets.GITHUB_TOKEN }}
-        body: |
-            自用红米AX6000改512版, padavanonly大佬闭源驱动版固件
-            基于${{ env.REPO_BRANCH }}, 编译时间: ${{ env.FILE_DATE }}
-            
-            Default IP: 10.0.0.1
-            Default Wi-Fi: AX6000
-            Default username: root
-            Default password: 无
-            
-    - name: 删除旧版本
-      uses: dev-drprasad/delete-older-releases@master
-      if: env.ORGANIZE_STATUS == 'success' && !cancelled()
-      with:
-        repo: ${{ github.repository }}
-        keep_latest: 2
-        delete_tag_pattern: 'redmi_ax6000'
-        delete_tags: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+- name: 下载依赖
+  run: |
+    cd openwrt
+    make defconfig
+    make download -j$(nproc)
+    find dl -size -1024c -delete
+
+- name: 编译固件
+  run: |
+    cd openwrt
+    echo 'CONFIG_CCACHE=y' >> .config
+    export CCACHE_DIR=/mnt/build_wrt/openwrt/.ccache
+    export CCACHE_MAXSIZE=2G
+
+    echo "开始编译..."
+    make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
+
+    echo "DEVICE_NAME=AX6000-512M" >> $GITHUB_ENV
+    echo "FILE_DATE=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_ENV
+
+- name: 整理固件
+  run: |
+    cd openwrt/bin/targets/*/*
+    rm -rf packages
+    rename 's/^/AX6000-512M_/' *.bin || true
+    echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+
+- name: 上传Artifact
+  uses: actions/upload-artifact@v4
+  with:
+    name: AX6000_firmware
+    path: ${{ env.FIRMWARE }}
+
+- name: 发布Release
+  uses: ncipollo/release-action@v1
+  with:
+    tag: AX6000-${{ env.FILE_DATE }}
+    artifacts: ${{ env.FIRMWARE }}/*
+    allowUpdates: true
+    token: ${{ secrets.GITHUB_TOKEN }}
+    body: |
+      AX6000 专用512M固件
+      分支: ${{ env.REPO_BRANCH }}
+      编译时间: ${{ env.FILE_DATE }}
+
+      默认IP: 10.0.0.1
+      用户名: root
+      密码: 无
+
+- name: 清理旧版本
+  uses: dev-drprasad/delete-older-releases@v0.3.0
+  with:
+    keep_latest: 2
+    delete_tags: true
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
