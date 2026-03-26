@@ -100,7 +100,6 @@ echo -e "msgstr \"科学上网\"" >> feeds/luci/applications/luci-app-openclash/
 # 软件包与配置
 echo "CONFIG_PACKAGE_luci-app-argon=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
-
 echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
 #echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
@@ -108,3 +107,9 @@ echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-lucky=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-netwizard=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-oaf=y" >> .config
+
+# 注入编译加速选项
+echo "CONFIG_DEVEL=y" >> .config
+echo "CONFIG_CCACHE=y" >> .config
+echo "CONFIG_KERNEL_DEBUG_INFO=n" >> .config
+echo "CONFIG_OPENSSL_OPTIMIZE_SPEED=y" >> .config
