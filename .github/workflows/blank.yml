@@ -3,6 +3,7 @@ name: OpenWrt Builder (AX6000优化版)
 on:
   repository_dispatch:
   workflow_dispatch:
+
 env:
   REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase
   REPO_BRANCH: 25.12-dev
@@ -14,98 +15,99 @@ env:
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
+
 jobs:
   build:
     runs-on: ubuntu-22.04
-steps:
-- name: Checkout
-  uses: actions/checkout@v4
-- name: 清理磁盘
-  run: |
-    sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /usr/lib/jvm
-    sudo docker image prune -af
-    df -hT
-- name: 初始化环境
-  run: |
-    sudo apt update -y
-    sudo apt install -y dos2unix jq libfuse-dev
-    sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
-    sudo timedatectl set-timezone "$TZ"
-    mkdir -p /workdir
-    sudo chown $USER:$GROUPS /workdir
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-- name: 克隆源码
-  working-directory: /workdir
-  run: |
-    git clone $REPO_URL -b $REPO_BRANCH openwrt
-    ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+      - name: 清理磁盘
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /usr/lib/jvm
+          sudo docker image prune -af
+          df -hT
 
-- name: 缓存加速
-  uses: actions/cache@v4
-  with:
-    path: |
-      /workdir/openwrt/.ccache
-      /workdir/openwrt/staging_dir
-    key: ax6000-${{ env.REPO_BRANCH }}-${{ hashFiles('openwrt/.config','diy-part*.sh') }}
+      - name: 初始化环境
+        run: |
+          sudo apt update -y
+          sudo apt install -y dos2unix jq libfuse-dev
+          sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+          sudo timedatectl set-timezone "$TZ"
+          mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
 
-- name: 加载 feeds
-  run: |
-    chmod +x $DIY_P1_SH
-    cd openwrt
-    $GITHUB_WORKSPACE/$DIY_P1_SH
-    ./scripts/feeds update -a -f
-    ./scripts/feeds install -a
+      - name: 克隆源码
+        working-directory: /workdir
+        run: |
+          git clone $REPO_URL -b $REPO_BRANCH openwrt
+          ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
-- name: 加载配置
-  run: |
-    mv $CONFIG_FILE openwrt/.config
-    chmod +x $DIY_P2_SH
-    cd openwrt
-    $GITHUB_WORKSPACE/$DIY_P2_SH
+      - name: 缓存加速
+        uses: actions/cache@v4
+        with:
+          path: |
+            /workdir/openwrt/.ccache
+            /workdir/openwrt/staging_dir
+          key: ax6000-${{ env.REPO_BRANCH }}-${{ hashFiles('openwrt/.config','diy-part*.sh') }}
 
-- name: 下载依赖
-  run: |
-    cd openwrt
-    make defconfig
-    make download -j$(nproc)
-    find dl -size -1024c -delete
+      - name: 加载 feeds
+        run: |
+          chmod +x $DIY_P1_SH
+          cd openwrt
+          $GITHUB_WORKSPACE/$DIY_P1_SH
+          ./scripts/feeds update -a -f
+          ./scripts/feeds install -a
 
-- name: 编译固件
-  run: |
-    cd openwrt
-    echo 'CONFIG_CCACHE=y' >> .config
-    export CCACHE_DIR=/workdir/openwrt/.ccache
-    export CCACHE_MAXSIZE=2G
+      - name: 加载配置
+        run: |
+          mv $CONFIG_FILE openwrt/.config
+          chmod +x $DIY_P2_SH
+          cd openwrt
+          $GITHUB_WORKSPACE/$DIY_P2_SH
 
-    make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
+      - name: 下载依赖
+        run: |
+          cd openwrt
+          make defconfig
+          make download -j$(nproc)
+          find dl -size -1024c -delete
 
-    echo "FILE_DATE=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_ENV
+      - name: 编译固件
+        run: |
+          cd openwrt
+          echo 'CONFIG_CCACHE=y' >> .config
+          export CCACHE_DIR=/workdir/openwrt/.ccache
+          export CCACHE_MAXSIZE=2G
+          make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
+          echo "FILE_DATE=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_ENV
 
-- name: 整理固件
-  run: |
-    cd openwrt/bin/targets/*/*
-    rm -rf packages
-    rename 's/^/AX6000-512M_/' *.bin || true
-    echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+      - name: 整理固件
+        run: |
+          cd openwrt/bin/targets/*/*
+          rm -rf packages
+          rename 's/^/AX6000-512M_/' *.bin || true
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
 
-- name: 上传固件
-  uses: actions/upload-artifact@v4
-  with:
-    name: AX6000_firmware
-    path: ${{ env.FIRMWARE }}
+      - name: 上传固件
+        uses: actions/upload-artifact@v4
+        with:
+          name: AX6000_firmware
+          path: ${{ env.FIRMWARE }}
 
-- name: 发布Release
-  uses: softprops/action-gh-release@v2
-  with:
-    tag_name: AX6000-${{ env.FILE_DATE }}
-    files: ${{ env.FIRMWARE }}/*
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 发布Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: AX6000-${{ env.FILE_DATE }}
+          files: ${{ env.FIRMWARE }}/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-- name: 删除旧版本
-  uses: dev-drprasad/delete-older-releases@v0.3.0
-  with:
-    keep_latest: 3
-    delete_tags: true
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 删除旧版本
+        uses: dev-drprasad/delete-older-releases@v0.3.0
+        with:
+          keep_latest: 3
+          delete_tags: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
