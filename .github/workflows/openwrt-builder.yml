@@ -73,6 +73,12 @@ steps:
     cd openwrt
     $GITHUB_WORKSPACE/$DIY_P2_SH
 
+- name: 强制AX6000单设备
+  run: |
+    cd openwrt
+    sed -i 's/CONFIG_TARGET_MULTI_PROFILE=y/# CONFIG_TARGET_MULTI_PROFILE is not set/' .config
+    grep xiaomi_redmi-router-ax6000-ubootmod .config
+
 - name: SSH调试
   uses: P3TERX/ssh2actions@v1.0.0
   if: github.event.inputs.ssh == 'true'
