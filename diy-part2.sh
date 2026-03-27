@@ -39,7 +39,7 @@ sed -i 's/reg = <0x600000 0x[0-9a-fA-F]\{7\}>/reg = <0x600000 0x1ea00000>/' targ
 # Theme
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
-git clone https://github.com/sbwml/luci-theme-argon -b openwrt-25.12 package/argon
+git clone https://github.com/sbwml/luci-theme-argon -b openwrt-24.10 package/argon
 
 # adguardhome
 git clone https://github.com/F-57/luci-app-adguardhome package/luci-app-adguardhome
