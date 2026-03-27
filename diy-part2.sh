@@ -34,7 +34,7 @@ sed -i "/set wireless.default_\${dev}.encryption='sae-mixed'/a \\\t\t\t\t\t\set 
 # 24.10-5.4内核：
 # sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/files-5.4/arch/arm64/boot/dts/mediatek/mt7986a-xiaomi-redmi-router-ax6000.dts
 # 24.10-6.6内核：名字看似是ubootmod，实则做了分区修改可以uboot放心刷入
-# sed -i 's/reg = <0x600000 0x6e00000>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
+sed -i 's/reg = <0x600000 0x[0-9a-fA-F]\{7\}>/reg = <0x600000 0x1ea00000>/' target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
 
 # Theme
 rm -rf feeds/luci/themes/luci-theme-argon
