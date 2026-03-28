@@ -101,7 +101,7 @@ echo -e "msgstr \"科学上网\"" >> feeds/luci/applications/luci-app-openclash/
 echo "CONFIG_PACKAGE_luci-app-argon=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
-#echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-airconnect=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-lucky=y" >> .config
