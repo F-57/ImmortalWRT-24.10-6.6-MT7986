@@ -39,7 +39,7 @@ sed -i 's/reg = <0x600000 0x[0-9a-fA-F]\{7\}>/reg = <0x600000 0x1ea00000>/' targ
 # Theme
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
-git clone https://github.com/sbwml/luci-theme-argon -b openwrt-24.10 package/argon
+git clone https://github.com/sbwml/luci-theme-argon -b openwrt-25.12 package/argon
 
 # adguardhome
 git clone https://github.com/F-57/luci-app-adguardhome package/luci-app-adguardhome
@@ -109,7 +109,7 @@ echo "CONFIG_PACKAGE_luci-app-netwizard=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-oaf=y" >> .config
 
 # 注入编译加速选项
-echo "CONFIG_DEVEL=y" >> .config
+
 echo "CONFIG_CCACHE=y" >> .config
 echo "CONFIG_KERNEL_DEBUG_INFO=n" >> .config
 echo "CONFIG_OPENSSL_OPTIMIZE_SPEED=y" >> .config
