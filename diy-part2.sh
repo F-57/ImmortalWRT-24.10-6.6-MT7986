@@ -106,7 +106,7 @@ echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-lucky=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-netwizard=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-oaf=y" >> .config
+# echo "CONFIG_PACKAGE_luci-app-oaf=y" >> .config
 
 # 注入编译加速选项
 
