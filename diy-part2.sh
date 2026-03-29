@@ -43,6 +43,15 @@ if [ -f "$DTS_FILE" ]; then
     echo "DTS partition (6MB Offset, 490MB Size) modified successfully."
 fi
 
+# --- 核心修复：彻底铲除 Rust 及其相关隐性依赖 ---
+# 这一步是解决你报错的关键：物理删除 feeds 里的 rust 源码
+rm -rf feeds/packages/lang/rust
+rm -rf feeds/packages/libs/librusty
+
+# 修正 SSR Plus 逻辑，防止其扫描 Rust 依赖
+if [ -d "package/feeds/luci/luci-app-ssr-plus" ]; then
+    sed -i '/default PACKAGE_librusty_v1_crypto/d' package/feeds/luci/luci-app-ssr-plus/Config.in
+fi
 
 # Theme
 rm -rf feeds/luci/themes/luci-theme-argon
