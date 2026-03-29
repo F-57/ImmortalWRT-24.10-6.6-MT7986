@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 env:
-  REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase
-  REPO_BRANCH: rework-24.10
+  REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x-6.6
+  REPO_BRANCH: openwrt-24.10-6.6
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
@@ -79,8 +79,6 @@ jobs:
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x $DIY_P2_SH
         cd openwrt
-        # 在执行 DIY 脚本前，先尝试自动修复 Rust 校验问题
-        find feeds/packages/lang/rust -name "*.patch" -exec sed -i 's/"checksum": "[a-f0-9]*"/"checksum": null/g' {} + 2>/dev/null || true
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
     - name: 下载源码包 (dl)
@@ -97,7 +95,7 @@ jobs:
       run: |
         cd openwrt
         echo "正在使用 $(nproc) 线程进行编译..."
-        # 针对闭源驱动和 Rust 编译，如果多线程失败则自动切回单线程输出详细日志
+        # 如果多线程失败则自动切回单线程输出详细日志
         make -j$(nproc) || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
