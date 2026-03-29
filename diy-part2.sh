@@ -45,7 +45,7 @@ git clone https://github.com/sbwml/luci-theme-argon -b openwrt-25.12 package/arg
 git clone https://github.com/F-57/luci-app-adguardhome package/luci-app-adguardhome
 
 # 安装应用过滤
-rm -rf feeds/luci/applications/luci-app-appfilter
+# rm -rf feeds/luci/applications/luci-app-appfilter
 git clone https://github.com/destan19/OpenAppFilter.git package/OpenAppFilter
 
 # 安装 mosdns
@@ -106,7 +106,7 @@ echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-lucky=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-netwizard=y" >> .config
-# echo "CONFIG_PACKAGE_luci-app-oaf=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-oaf=y" >> .config
 
 # 注入编译加速选项
 
