@@ -77,6 +77,8 @@ echo -e "msgstr \"科学上网\"" >> feeds/luci/applications/luci-app-openclash/
 #echo -e "msgstr \"即插即用\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
 
 # 软件包与配置
+echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-argon=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-airconnect=y" >> .config
