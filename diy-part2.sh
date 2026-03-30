@@ -36,8 +36,8 @@ fi
 DTS_FILE="target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts"
 
 if [ -f "$DTS_FILE" ]; then
-    # 修改起始偏移与分区大小
-    sed -i 's/reg = <0x[0-9a-fA-F]* 0x[0-9a-fA-F]*>/reg = <0x600000 0x1ea00000>/' $DTS_FILE
+    # 只要是包含 "ubi" 标签的分区块，都强制修正为 6MB 起始 + 490MB 长度
+    sed -i '/label = "ubi"/,/reg =/ s/reg = <0x[0-9a-fA-F]* 0x[0-9a-fA-F]*>/reg = <0x600000 0x1ea00000>/' $DTS_FILE
 fi
 
 
