@@ -40,6 +40,8 @@ if [ -f "$DTS_FILE" ]; then
     sed -i '/label = "ubi"/,/reg =/ s/reg = <0x[0-9a-fA-F]* 0x[0-9a-fA-F]*>/reg = <0x600000 0x1ea00000>/' $DTS_FILE
 fi
 
+# 修复Coremark编译失败
+sed -i 's/\tmkdir/\tmkdir -p/g' feeds/packages/utils/coremark/Makefile
 
 # Theme
 rm -rf feeds/luci/themes/luci-theme-argon
