@@ -75,8 +75,8 @@ echo -e "msgstr \"大吉大利\"" >> package/lucky/luci-app-lucky/po/zh_Hans/luc
 echo -e "\nmsgid \"OpenClash\"" >> feeds/luci/applications/luci-app-openclash/po/zh-cn/openclash.zh-cn.po
 echo -e "msgstr \"科学上网\"" >> feeds/luci/applications/luci-app-openclash/po/zh-cn/openclash.zh-cn.po
 
-#echo -e "\nmsgid \"UPnP IGD & PCP\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
-#echo -e "msgstr \"即插即用\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
+echo -e "\nmsgid \"UPnP IGD & PCP\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
+echo -e "msgstr \"即插即用\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
 
 # 软件包与配置
 echo "CONFIG_LUCI_LANG_en=y" >> .config
