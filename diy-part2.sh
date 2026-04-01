@@ -83,6 +83,10 @@ echo "CONFIG_LUCI_LANG_en=y" >> .config
 echo "CONFIG_LUCI_LANG_zh_Hans=y" >> .config
 
 echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-autoreboot=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-mwan3=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-syncdial=y" >> .config
+
 echo "CONFIG_PACKAGE_luci-app-argon=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
