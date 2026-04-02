@@ -91,6 +91,9 @@ echo -e "msgstr \"转发分流\"" >> package/mosdns/luci-app-mosdns/po/zh_Hans/m
 echo -e "\nmsgid \"UPnP IGD & PCP\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
 echo -e "msgstr \"即插即用\"" >> feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
 
+echo -e "\nmsgid \"MultiWAN Manager\"" >> feeds/luci/applications/luci-app-mwan3/po/zh_Hans/mwan3.po
+echo -e "msgstr \"负载均衡\"" >> feeds/luci/applications/luci-app-mwan3/po/zh_Hans/mwan3.po
+
 # 软件包与配置
 echo "CONFIG_LUCI_LANG_en=y" >> .config
 echo "CONFIG_LUCI_LANG_zh_Hans=y" >> .config
