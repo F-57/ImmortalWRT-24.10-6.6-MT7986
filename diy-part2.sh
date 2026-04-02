@@ -47,6 +47,10 @@ sed -i 's/\tmkdir/\tmkdir -p/g' feeds/packages/utils/coremark/Makefile
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
 git clone https://github.com/sbwml/luci-theme-argon -b openwrt-24.10 package/argon
+git clone https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
+
+# 进阶设置
+git clone https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus
 
 # adguardhome
 git clone https://github.com/F-57/luci-app-adguardhome package/luci-app-adguardhome
@@ -101,10 +105,10 @@ echo "CONFIG_LUCI_LANG_zh_Hans=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-autoreboot=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-mwan3=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-syncdial=y" >> .config
 
+echo "CONFIG_PACKAGE_luci-app-advancedplus=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-argon=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> .config
+echo "CONFIG_PACKAGE_luci-theme-kucat=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-adguardhome=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-airconnect=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
