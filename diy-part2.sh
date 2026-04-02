@@ -1,17 +1,17 @@
 #!/bin/bash
-
-# --- 主机变量设置 ---
+# --- 基础系统设置 (IP/主机名) ---
+CFG_FILE="package/base-files/files/bin/config_generate"
 WRT_IP="10.0.0.1"
 WRT_NAME="AX6000"
-CFG_FILE="package/base-files/files/bin/config_generate"
 
-# 修改默认 IP 地址
-sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
-
-# 修改默认主机名 (兼容不同源码格式)
-sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
-sed -i "s/set system.@system\[0\].hostname=.*/set system.@system[0].hostname='$WRT_NAME'/g" $CFG_FILE
-
+if [ -f "$CFG_FILE" ]; then
+    # 修改默认 IP 地址
+    sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
+    # 修改默认主机名
+    sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
+    sed -i "s/set system.@system\[0\].hostname=.*/set system.@system[0].hostname='$WRT_NAME'/g" $CFG_FILE    
+    echo "基本配置已更新."
+fi
 
 # --- Wi-Fi 相关设置 (闭源驱动 mtwifi) ---
 WIFI_FILE="package/mtk/applications/mtwifi-cfg/files/mtwifi.sh"
@@ -27,9 +27,8 @@ if [ -f "$WIFI_FILE" ]; then
     sed -i "s/encryption=.*/encryption='sae-mixed'/g" $WIFI_FILE
     # 在加密方式行后插入 Wi-Fi 密码
     sed -i "/set wireless.default_\${dev}.encryption='sae-mixed'/a \\\t\t\t\t\t\set wireless.default_\${dev}.key='$WIFI_PASS'" $WIFI_FILE
-    echo "Wi-Fi configuration updated."
+    echo "Wi-Fi 配置已更新."
 fi
-
 
 # --- 512MB 大分区布局适配 (ubootmod) ---
 # 针对 6.6 内核及更高版本：将起始地址设为 0x600000，长度设为 490MB (0x1ea00000)
@@ -38,6 +37,7 @@ DTS_FILE="target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.
 if [ -f "$DTS_FILE" ]; then
     # 只要是包含 "ubi" 标签的分区块，都强制修正为 6MB 起始 + 490MB 长度
     sed -i '/label = "ubi"/,/reg =/ s/reg = <0x[0-9a-fA-F]* 0x[0-9a-fA-F]*>/reg = <0x600000 0x1ea00000>/' $DTS_FILE
+    echo "512MB 大分区布局."
 fi
 
 # 修复Coremark编译失败
