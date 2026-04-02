@@ -7,6 +7,11 @@ name: OpenWrt 固件编译
 on:
   repository_dispatch:
   workflow_dispatch:
+    inputs:
+      ssh:
+        description: '是否开启 SSH 调试 (true/false)'
+        required: false
+        default: 'false'
 
 env:
   REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x-6.6
@@ -101,6 +106,13 @@ jobs:
         make -j$(nproc) || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+
+    - name: SSH 链接管理 (仅编译失败或手动勾选时触发)
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: failure() || (github.event.inputs.ssh == 'true')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
     - name: 整理编译文件
       id: organize
