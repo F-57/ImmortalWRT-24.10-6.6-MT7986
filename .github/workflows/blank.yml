@@ -1,15 +1,11 @@
-#
-# GitHub Actions 编译脚本 - 针对 Redmi AX6000 优化加速版
-#
-
-name: OpenWrt 固件编译
+name: OpenWrt 固件编译 (AX6000 优化版)
 
 on:
   repository_dispatch:
   workflow_dispatch:
     inputs:
       ssh:
-        description: '是否开启 SSH 调试 (true/false)'
+        description: '是否开启 SSH 调试'
         required: false
         default: 'false'
 
@@ -20,12 +16,11 @@ env:
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
-  UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
-  # 关键变量：指定 ccache 缓存目录
-  CCACHE_DIR: ${{ github.workspace }}/openwrt/.ccache
+  # 统一缓存路径，避免 make clean 误删
+  CCACHE_DIR: /mnt/ccache
 
 jobs:
   build:
@@ -39,17 +34,17 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        # 腾出磁盘空间
+        # 清理无用文件释放空间
         sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/powershell /usr/local/lib/node_modules
-        # 安装编译依赖及 ccache
+        # 安装必要依赖
         sudo -E apt-get -y update
-        sudo -E apt-get -y install dos2unix python3-netifaces libfuse-dev clang patchelf binfmt-support qemu-user-static libssl-dev pkg-config ccache
-        # 使用官方推荐的初始化脚本
+        sudo -E apt-get -y install build-essential ccache clang flex gawk gettext git libfuse-dev libncurses5-dev libssl-dev python3 python3-setuptools qemu-utils rsync subversion swig unzip zlib1g-dev
+        # 使用官方脚本初始化
         sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
-        sudo -E timedatectl set-timezone "Asia/Shanghai"
-        # 准备大容量编译空间
-        sudo mkdir -p /mnt/build_wrt
-        sudo chown $USER:$GROUPS /mnt/build_wrt
+        sudo -E timedatectl set-timezone "$TZ"
+        # 准备大容量编译路径
+        sudo mkdir -p /mnt/build_wrt /mnt/ccache
+        sudo chown $USER:$GROUPS /mnt/build_wrt /mnt/ccache
         echo "环境初始化完成。"
 
     - name: 克隆源码
@@ -58,65 +53,63 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /mnt/build_wrt/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: 开启缓存加速 (dl库与ccache)
+    - name: 开启缓存加速 (dl & ccache)
       uses: actions/cache@v4
       with:
         path: |
-          openwrt/dl
+          /mnt/build_wrt/openwrt/dl
           ${{ env.CCACHE_DIR }}
-        key: ${{ runner.os }}-openwrt-${{ env.REPO_BRANCH }}-${{ github.run_id }}
+        # 根据配置文件生成 hash，配置文件变了就更新缓存基准
+        key: ${{ runner.os }}-openwrt-${{ env.REPO_BRANCH }}-${{ hashFiles('.config') }}
         restore-keys: |
           ${{ runner.os }}-openwrt-${{ env.REPO_BRANCH }}-
 
     - name: 加载自定义 Feeds
       run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $DIY_P1_SH
         cd openwrt
+        [ -e $GITHUB_WORKSPACE/$FEEDS_CONF ] && cp $GITHUB_WORKSPACE/$FEEDS_CONF feeds.conf.default
+        chmod +x $GITHUB_WORKSPACE/$DIY_P1_SH
         $GITHUB_WORKSPACE/$DIY_P1_SH
-
-    - name: 更新 & 安装 Feeds
-      run: |
-        cd openwrt
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: 加载自定义配置 (.config)
+    - name: 加载自定义配置
       run: |
-        [ -e files ] && mv files openwrt/files
-        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        chmod +x $DIY_P2_SH
         cd openwrt
+        [ -e $GITHUB_WORKSPACE/files ] && cp -r $GITHUB_WORKSPACE/files files
+        [ -e $GITHUB_WORKSPACE/$CONFIG_FILE ] && cp $GITHUB_WORKSPACE/$CONFIG_FILE .config
+        
+        # 核心：确保 OpenWrt 内部开启了 ccache
+        echo "CONFIG_CCACHE=y" >> .config
+        echo "CONFIG_CCACHE_DIR=\"${{ env.CCACHE_DIR }}\"" >> .config
+        
+        chmod +x $GITHUB_WORKSPACE/$DIY_P2_SH
         $GITHUB_WORKSPACE/$DIY_P2_SH
+        
+        # 刷新配置并同步依赖
+        make defconfig
 
     - name: 下载源码包 (dl)
-      id: package
       run: |
         cd openwrt
-        make defconfig
-        make download -j16
-        find dl -size -1024c -exec ls -l {} \;
+        make download -j$(nproc)
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 开始编译固件
-      id: compile
+    - name: 开始编译
       run: |
         cd openwrt
         export CCACHE_DIR=${{ env.CCACHE_DIR }}
-        echo "正在使用 $(nproc) 线程进行编译..."
-        ccache -s || true
-        # 开始编译
+        ccache -z # 清空旧统计
+        
+        echo "正在使用 $(nproc) 线程编译..."
         make -j$(nproc) || make -j1 V=s
-        ccache -s || true
-        echo "status=success" >> $GITHUB_OUTPUT
+        
+        ccache -s # 打印缓存命中率
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
-    - name: SSH 链接管理 (仅编译失败或手动勾选时触发)
+    - name: SSH 链接管理
       uses: P3TERX/ssh2actions@v1.0.0
       if: failure() || (github.event.inputs.ssh == 'true')
-      env:
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
     - name: 整理编译文件
       id: organize
@@ -128,10 +121,9 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 发布固件到 Release
-      uses: softprops/action-gh-release@master
+      uses: softprops/action-gh-release@v2
       if: steps.organize.outputs.status == 'success' && !cancelled()
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: OpenWrt_AX6000_${{ env.FILE_DATE }}
         files: ${{ env.FIRMWARE }}/*
+        token: ${{ secrets.GITHUB_TOKEN }}
