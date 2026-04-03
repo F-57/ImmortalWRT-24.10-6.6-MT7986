@@ -75,6 +75,10 @@ git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
 
 # 更改菜单名字
+package/luci-app-kucat-config
+echo -e "\nmsgid \"KuCat Theme Config\"" >> package/luci-app-kucat-config/po/zh_Hans/kucat-config.po
+echo -e "msgstr \"主题设置\"" >> package/luci-app-kucat-config/po/zh_Hans/kucat-config.po
+
 echo -e "\nmsgid \"OpenList\"" >> package/openlist/luci-app-openlist2/po/zh_Hans/openlist2.po
 echo -e "msgstr \"聚合网盘\"" >> package/openlist/luci-app-openlist2/po/zh_Hans/openlist2.po
 
