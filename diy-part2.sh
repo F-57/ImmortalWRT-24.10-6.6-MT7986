@@ -52,9 +52,20 @@ else
     echo "警告: 未找到 $DTSI_FILE，请检查路径。"
 fi
 
+# Git稀疏克隆，只克隆指定目录到本地
+function git_sparse_clone() {
+  branch="$1" repourl="$2" && shift 2
+  git clone --depth=1 -b $branch --single-branch --filter=blob:none --sparse $repourl
+  repodir=$(echo $repourl | awk -F '/' '{print $(NF)}')
+  cd $repodir && git sparse-checkout set $@
+  mv -f $@ ../package
+  cd .. && rm -rf $repodir
+}
+
 # --- 插件集成 ---
-git clone --depth 1 https://github.com/F-57/luci-app-adguardhome package/luci-app-adguardhome
-git clone --depth 1 https://github.com/sbwml/luci-app-airconnect package/airconnect
+git_sparse_clone main https://github.com/F-57/luci-app-adguardhome luci-app-adguardhome
+git_sparse_clone main https://github.com/sbwml/luci-app-airconnect airconnect
+git_sparse_clone main https://github.com/sbwml/luci-app-airconnect luci-app-airconnect
 
 # 更改菜单名字 参数1是文件路径，参数2是原始文字，参数3是目标文字
 change_name() {
