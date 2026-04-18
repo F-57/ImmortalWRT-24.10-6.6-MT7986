@@ -88,9 +88,12 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_P2_SH
         
     - name: 下载源码包 (dl)
+      id: package
       run: |
         cd openwrt
-        make download -j$(nproc)
+        make defconfig
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
     - name: 开始编译
