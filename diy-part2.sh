@@ -58,14 +58,18 @@ function git_sparse_clone() {
   git clone --depth=1 -b $branch --single-branch --filter=blob:none --sparse $repourl
   repodir=$(echo $repourl | awk -F '/' '{print $(NF)}')
   cd $repodir && git sparse-checkout set $@
-  mv -f $@ ../package
-  cd .. && rm -rf $repodir
+  mkdir -p ../package
+  for dir in "$@"; do
+    rm -rf "../package/$dir"
+    mv -f "$dir" ../package/
+  done
+  cd ..
+  rm -rf "$repodir"
 }
 
 # --- 插件集成 ---
 git_sparse_clone main https://github.com/F-57/luci-app-adguardhome luci-app-adguardhome
-git_sparse_clone main https://github.com/sbwml/luci-app-airconnect airconnect
-git_sparse_clone main https://github.com/sbwml/luci-app-airconnect luci-app-airconnect
+git_sparse_clone main https://github.com/sbwml/luci-app-airconnect airconnect luci-app-airconnect
 
 # 更改菜单名字 参数1是文件路径，参数2是原始文字，参数3是目标文字
 change_name() {
