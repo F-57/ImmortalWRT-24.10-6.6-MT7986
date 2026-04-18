@@ -82,9 +82,6 @@ jobs:
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x $DIY_P2_SH
         cd openwrt
-        # 核心：确保 OpenWrt 内部开启了 ccache
-        echo "CONFIG_CCACHE=y" >> .config
-        echo "CONFIG_CCACHE_DIR=\"${{ env.CCACHE_DIR }}\"" >> .config
         $GITHUB_WORKSPACE/$DIY_P2_SH
         
     - name: 下载源码包 (dl)
