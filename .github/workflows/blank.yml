@@ -57,7 +57,7 @@ jobs:
         ln -sf /mnt/build_wrt/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: 开启缓存加速 (dl & ccache)
-      uses: actions/cache@v4
+      uses: actions/cache@main
       with:
         path: |
           /mnt/build_wrt/openwrt/dl
