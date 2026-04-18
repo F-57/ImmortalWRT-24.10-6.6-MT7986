@@ -52,6 +52,10 @@ else
     echo "警告: 未找到 $DTSI_FILE，请检查路径。"
 fi
 
+# --- 插件集成 ---
+git clone --depth 1 https://github.com/F-57/luci-app-adguardhome package/luci-app-adguardhome
+git clone --depth 1 https://github.com/sbwml/luci-app-airconnect package/airconnect
+
 # 更改菜单名字 参数1是文件路径，参数2是原始文字，参数3是目标文字
 change_name() {
     local file=$1
@@ -80,4 +84,6 @@ CONFIG_STRIP_KERNEL_EXPORTS=y
 # CONFIG_PACKAGE_luci-app-ttyd is not set
 CONFIG_PACKAGE_luci-theme-argon=y
 CONFIG_PACKAGE_luci-app-upnp=y
+CONFIG_PACKAGE_luci-app-adguardhome=y
+CONFIG_PACKAGE_luci-app-airconnect=y
 EOF
