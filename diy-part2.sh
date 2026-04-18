@@ -52,6 +52,24 @@ else
     echo "警告: 未找到 $DTSI_FILE，请检查路径。"
 fi
 
+# 更改菜单名字 参数1是文件路径，参数2是原始文字，参数3是目标文字
+change_name() {
+    local file=$1
+    local id=$2
+    local str=$3
+    if [ -f "$file" ]; then
+        # 匹配 msgid 后的下一行 msgstr 并进行替换
+        sed -i "/msgid \"$id\"/{n;s/msgstr \".*\"/msgstr \"$str\"/}" "$file"
+        echo "已修改 $id 为 $str"
+    else
+        echo "跳过：未找到文件 $file"
+    fi
+}
+
+change_name "feeds/luci/modules/luci-base/po/zh_Hans/base.po" "Processes" "系统进程"
+change_name "feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po" "UPnP IGD & PCP" "即插即用"
+
+
 # 预置编译选项 (写入 .config)
 cat >> .config <<EOF
 CONFIG_LUCI_LANG_en=y
@@ -59,6 +77,7 @@ CONFIG_LUCI_LANG_zh_Hans=y
 CONFIG_KERNEL_DEBUG_INFO=n
 CONFIG_OPENSSL_OPTIMIZE_SPEED=y
 CONFIG_STRIP_KERNEL_EXPORTS=y
+
 CONFIG_PACKAGE_luci-theme-argon=y
 CONFIG_PACKAGE_luci-app-upnp=y
 EOF
