@@ -73,6 +73,8 @@ change_name() {
 change_name "feeds/luci/modules/luci-base/po/zh_Hans/base.po" "Processes" "系统进程"
 change_name "feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po" "UPnP IGD & PCP" "即插即用"
 
+# 修改upnp服务地址
+sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" feeds/luci/applications/luci-app-upnp/htdocs/luci-static/resources/view/upnp/upnp.js
 
 # 预置编译选项 (写入 .config)
 cat >> .config <<EOF
