@@ -89,6 +89,7 @@ sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" feeds/luci/applications/luci-app-u
 
 # 预置编译选项 (写入 .config)
 cat >> .config <<EOF
+CONFIG_CCACHE=y
 CONFIG_LUCI_LANG_en=y
 CONFIG_LUCI_LANG_zh_Hans=y
 CONFIG_KERNEL_DEBUG_INFO=n
