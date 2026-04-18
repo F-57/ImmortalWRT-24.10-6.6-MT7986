@@ -78,13 +78,13 @@ jobs:
 
     - name: 加载自定义配置
       run: |
+        [ -e files ] && mv files openwrt/files
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        chmod +x $DIY_P2_SH
         cd openwrt
-        [ -e $GITHUB_WORKSPACE/files ] && cp -r $GITHUB_WORKSPACE/files files
-        [ -e $GITHUB_WORKSPACE/$CONFIG_FILE ] && cp $GITHUB_WORKSPACE/$CONFIG_FILE .config
         # 核心：确保 OpenWrt 内部开启了 ccache
         echo "CONFIG_CCACHE=y" >> .config
         echo "CONFIG_CCACHE_DIR=\"${{ env.CCACHE_DIR }}\"" >> .config
-        chmod +x $GITHUB_WORKSPACE/$DIY_P2_SH
         $GITHUB_WORKSPACE/$DIY_P2_SH
         
     - name: 下载源码包 (dl)
