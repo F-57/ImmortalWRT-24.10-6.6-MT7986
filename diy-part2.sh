@@ -52,16 +52,12 @@ else
     echo "警告: 未找到 $DTSI_FILE，请检查路径。"
 fi
 
-
-# 软件包与配置
-echo "CONFIG_LUCI_LANG_en=y" >> .config
-echo "CONFIG_LUCI_LANG_zh_Hans=y" >> .config
-
-echo "CONFIG_PACKAGE_luci-app-upnp=y" >> .config
-echo "CONFIG_PACKAGE_luci-app-argon=y" >> .config
-
-# 性能与体积优化
-echo "CONFIG_KERNEL_DEBUG_INFO=n" >> .config
-echo "CONFIG_OPENSSL_OPTIMIZE_SPEED=y" >> .config
-# 既然是 AX6000 512MB 版，建议再加一个提高插件运行效率的
-echo "CONFIG_STRIP_KERNEL_EXPORTS=y" >> .config
+# 预置编译选项 (写入 .config)
+cat >> .config <<EOF
+CONFIG_LUCI_LANG_en=y
+CONFIG_LUCI_LANG_zh_Hans=y
+CONFIG_KERNEL_DEBUG_INFO=n
+CONFIG_OPENSSL_OPTIMIZE_SPEED=y
+CONFIG_STRIP_KERNEL_EXPORTS=y
+CONFIG_PACKAGE_luci-app-argon=y
+EOF
