@@ -6,7 +6,8 @@ WRT_NAME="AX6000"
 
 if [ -f "$CFG_FILE" ]; then
     # 修改默认 IP 地址
-    sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
+    sed -i "s/192\.168\.1\.1/$WRT_IP/g" $CFG_FILE
+    sed -i 's/192\.168\.\$((addr_offset++))\.1/10\.0\.\$((addr_offset++))\.1/g' $CFG_FILE
     # 修改默认主机名
     sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
     sed -i "s/set system.@system\[0\].hostname=.*/set system.@system[0].hostname='$WRT_NAME'/g" $CFG_FILE    
@@ -36,8 +37,10 @@ DTSI_FILE="target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000.dtsi"
 
 # --- 1. 512MB 闪存大分区布局适配 (修改 .dts) ---
 if [ -f "$DTS_FILE" ]; then
+    # 先修改分区节点的名称地址（从 partition@580000 修改为 @600000）
+    sed -i 's/partition@580000/partition@600000/g' "$DTS_FILE"
     # 修正 UBI 分区起始地址为 6MB (0x600000)，长度扩展为 490MB (0x1ea00000)
-    sed -i '/label = "ubi"/,/reg =/ s/reg = <0x[0-9a-fA-F]* 0x[0-9a-fA-F]*>/reg = <0x600000 0x1ea00000>/' $DTS_FILE
+    sed -i '/partition@600000/,/};/ { /reg =/ s/<0x[0-9a-fA-F]* 0x[0-9a-fA-F]*>/<0x600000 0x1ea00000>/; }' "$DTS_FILE"
     echo "Flash: 已成功修改 .dts 文件，适配 512MB 闪存布局。"
 else
     echo "警告: 未找到 $DTS_FILE，请检查路径。"
