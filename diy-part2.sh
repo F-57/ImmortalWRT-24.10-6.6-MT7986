@@ -48,7 +48,7 @@ if [ -f "$DTSI_FILE" ]; then
     # 将 memory 块中的长度从 512MB (0x20000000) 修正为 1GB (0x40000000)
     sed -i 's/<0 0x40000000 0 0x20000000>/<0 0x40000000 0 0x40000000>/g' $DTSI_FILE
     echo "RAM: 已成功修改 .dtsi 文件，适配 1GB 内存。"
-    sed -i 's/mediatek,mtd-eeprom = <&factory 0x0>;/mediatek,mtd-eeprom = <&factory 0x0000>, <&factory 0x8000>;/g' "$DTSI_FILE"
+    sed -i 's/mediatek,mtd-eeprom = <\&factory 0x0>;/mediatek,mtd-eeprom = <\&factory 0x0000>, <\&factory 0x8000>;/g' "$DTSI_FILE"
     echo "WiFi: 5G EEPROM 偏移量 (0x8000) 修正完成。"
     sed -i '/bootargs =/ s/";/ swiotlb=512";/' "$DTSI_FILE"
     echo "Kernel: 已添加 swiotlb=512 参数。"
