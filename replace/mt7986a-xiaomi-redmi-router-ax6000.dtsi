@@ -278,7 +278,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&wf_2g_5g_pins>;
 
-	mediatek,mtd-eeprom = <&factory 0x0000>, <&factory 0x8000>;
+	mediatek,mtd-eeprom = <&factory 0x0000>, <&factory 0x0200>;
 };
 
 &uart0 {
