@@ -18,6 +18,7 @@
 
 	chosen: chosen {
 		stdout-path = "serial0:115200n8";
+		bootargs = "swiotlb=512";
 	};
 
 	memory {
