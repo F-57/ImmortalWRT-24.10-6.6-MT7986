@@ -59,6 +59,9 @@ fi
 # 删除系统预制包
 rm -rf feeds/luci/themes/luci-theme-argon
 
+# 网络加速移除 ttyd 依赖
+sed -i 's/+luci-app-ttyd//g' package/mtk/applications/luci-app-turboacc-mtk/Makefile
+
 # Git稀疏克隆，只克隆指定目录到本地
 function git_sparse_clone() {
   branch="$1" repourl="$2" && shift 2
