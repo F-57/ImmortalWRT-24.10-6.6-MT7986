@@ -43,17 +43,12 @@ else
     echo "警告: 未找到 $DTS_FILE，请检查路径。"
 fi
 
-# --- 2. 1GB 内存适配 (修改 .dtsi) ---
-if [ -f "$DTSI_FILE" ]; then
-    # 将 memory 块中的长度从 512MB (0x20000000) 修正为 1GB (0x40000000)
-    sed -i 's/<0 0x40000000 0 0x20000000>/<0 0x40000000 0 0x40000000>/g' $DTSI_FILE
-    echo "RAM: 已成功修改 .dtsi 文件，适配 1GB 内存。"
-    sed -i 's/mediatek,mtd-eeprom = <\&factory 0x0>;/mediatek,mtd-eeprom = <\&factory 0x0000>, <\&factory 0x8000>;/g' "$DTSI_FILE"
-    echo "WiFi: 5G EEPROM 偏移量 (0x8000) 修正完成。"
-    sed -i '/bootargs =/ s/";/ swiotlb=512";/' "$DTSI_FILE"
-    echo "Kernel: 已添加 swiotlb=512 参数。"
-else
-    echo "警告: 未找到 $DTSI_FILE，请检查路径。"
+# 2. 执行文件替换 (1GB RAM & WiFi 补丁)
+if [ -f "replace/mt7986a-xiaomi-redmi-router-ax6000.dtsi" ]; then
+    cp -f replace/mt7986a-xiaomi-redmi-router-ax6000.dtsi $DTSI_FILE
+    echo "✅ RAM/WiFi: 已使用本地文件覆盖源码 DTSi"
+else   
+    echo "❌ 错误: 在 replace/ 目录下未找到补丁文件，请检查仓库路径"
 fi
 
 # 删除系统预制包
