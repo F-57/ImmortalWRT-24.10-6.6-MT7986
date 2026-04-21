@@ -56,11 +56,11 @@ else
     echo "警告: 未找到 $DTSI_FILE，请检查路径。"
 fi
 
-
+# 进入 turboacc 插件目录，强行删除对 luci-app-ttyd 的依赖要求
+sed -i 's/+luci-app-ttyd//g' package/mtk/applications/luci-app-turboacc-mtk/Makefile
 
 # 删除系统预制包
 rm -rf feeds/luci/themes/luci-theme-argon
-rm -rf feeds/luci/applications/luci-app-ttyd
 
 # Git稀疏克隆，只克隆指定目录到本地
 function git_sparse_clone() {
