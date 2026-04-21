@@ -44,8 +44,8 @@ else
 fi
 
 # 2. 执行文件替换 (1GB RAM & WiFi 补丁)
-if [ -f "replace/mt7986a-xiaomi-redmi-router-ax6000.dtsi" ]; then
-    cp -f replace/mt7986a-xiaomi-redmi-router-ax6000.dtsi $DTSI_FILE
+if [ -f "$GITHUB_WORKSPACE/replace/mt7986a-xiaomi-redmi-router-ax6000.dtsi" ]; then
+    cp -f $GITHUB_WORKSPACE/replace/mt7986a-xiaomi-redmi-router-ax6000.dtsi $DTSI_FILE
     echo "✅ RAM/WiFi: 已使用本地文件覆盖源码 DTSi"
 else   
     echo "❌ 错误: 在 replace/ 目录下未找到补丁文件，请检查仓库路径"
