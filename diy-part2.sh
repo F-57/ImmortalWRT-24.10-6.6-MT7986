@@ -80,7 +80,6 @@ function git_sparse_clone() {
 # --- 插件集成 ---
 git_sparse_clone main https://github.com/F-57/luci-app luci-app-adguardhome airconnect luci-app-airconnect
 git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
-git clone --depth 1 https://github.com/papagaye744/luci-theme-design package/luci-theme-design
 
 # 更改菜单名字 参数1是文件路径，参数2是原始文字，参数3是目标文字
 change_name() {
@@ -111,7 +110,6 @@ CONFIG_OPENSSL_kmod-mtd-rw=y
 CONFIG_LUCI_LANG_en=y
 CONFIG_LUCI_LANG_zh_Hans=y
 CONFIG_PACKAGE_luci-theme-argon=y
-CONFIG_PACKAGE_luci-theme-design=y
 CONFIG_PACKAGE_luci-app-upnp=y
 CONFIG_PACKAGE_luci-app-adguardhome=y
 CONFIG_PACKAGE_luci-app-airconnect=y
