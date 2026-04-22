@@ -54,15 +54,16 @@ fi
 # 删除系统预制包
 rm -rf feeds/luci/themes/luci-theme-argon
 
-# 网络加速移除 ttyd 依赖
-sed -i 's/ +luci-app-ttyd//g' package/mtk/applications/luci-app-turboacc-mtk/Makefile
-
-# 在所有文件中查找并回显包含 +luci-app-ttyd 的行
-echo "--- Scanning for luci-app-ttyd dependencies ---"
-grep -rn "+luci-app-ttyd" ./ | while read -r line; do
-    echo "Found dependency: $line"
+# 自动查找luci-app-ttyd并清理，同时打印被修改的文件名
+echo "--- Cleaning up luci-app-ttyd dependencies ---"
+# 查找所有 Makefile，如果包含 +luci-app-ttyd 就打印并修改
+find ./package ./feeds -name Makefile -type f -exec grep -l " +luci-app-ttyd" {} + | while read -r file; do
+    echo "Patching: $file"
+    sed -i 's/+luci-app-ttyd//g' "$file"
 done
-echo "--- Scan Complete ---"
+# 修改完后必须清理 tmp 目录，否则编译索引不会更新
+rm -rf tmp/
+echo "--- All done! ---"
 
 # Git稀疏克隆，只克隆指定目录到本地
 function git_sparse_clone() {
