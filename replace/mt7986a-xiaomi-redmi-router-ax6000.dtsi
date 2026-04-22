@@ -165,7 +165,7 @@
 			factory: partition@180000 {
 				label = "Factory";
 				reg = <0x180000 0x200000>;
-
+				read-only;
 
 				nvmem-layout {
 					compatible = "fixed-layout";
