@@ -55,7 +55,7 @@ fi
 rm -rf feeds/luci/themes/luci-theme-argon
 
 # 网络加速移除 ttyd 依赖
-sed -i 's/+luci-app-ttyd//g' package/mtk/applications/luci-app-turboacc-mtk/Makefile
+sed -i 's/ +luci-app-ttyd//g' package/mtk/applications/luci-app-turboacc-mtk/Makefile
 
 # Git稀疏克隆，只克隆指定目录到本地
 function git_sparse_clone() {
