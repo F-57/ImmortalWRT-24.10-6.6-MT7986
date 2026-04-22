@@ -57,6 +57,13 @@ rm -rf feeds/luci/themes/luci-theme-argon
 # 网络加速移除 ttyd 依赖
 sed -i 's/ +luci-app-ttyd//g' package/mtk/applications/luci-app-turboacc-mtk/Makefile
 
+# 在所有文件中查找并回显包含 +luci-app-ttyd 的行
+echo "--- Scanning for luci-app-ttyd dependencies ---"
+grep -rn "+luci-app-ttyd" ./ | while read -r line; do
+    echo "Found dependency: $line"
+done
+echo "--- Scan Complete ---"
+
 # Git稀疏克隆，只克隆指定目录到本地
 function git_sparse_clone() {
   branch="$1" repourl="$2" && shift 2
