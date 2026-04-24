@@ -55,17 +55,6 @@ fi
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-openclash
 
-# 自动查找luci-app-ttyd并清理，同时打印被修改的文件名
-echo "--- Cleaning up luci-app-ttyd dependencies ---"
-# 查找所有 Makefile，如果包含 +luci-app-ttyd 就打印并修改
-find ./package ./feeds -name Makefile -type f -exec grep -l " +luci-app-ttyd" {} + | while read -r file; do
-    echo "Patching: $file"
-    sed -i 's/ +luci-app-ttyd//g' "$file"
-done
-# 修改完后必须清理 tmp 目录，否则编译索引不会更新
-rm -rf tmp/
-echo "--- All done! ---"
-
 # Git稀疏克隆，只克隆指定目录到本地
 function git_sparse_clone() {
   branch="$1" repourl="$2" && shift 2
@@ -83,7 +72,7 @@ function git_sparse_clone() {
 
 # --- 插件集成 ---
 git_sparse_clone main https://github.com/F-57/luci-app luci-app-adguardhome airconnect luci-app-airconnect
-git_sparse_clone main https://github.com/vernesong/openclash luci-app-openclash
+git_sparse_clone master https://github.com/vernesong/openclash luci-app-openclash
 git_sparse_clone main https://github.com/sirpdboy/luci-app-lucky lucky luci-app-lucky
 git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
 
@@ -108,6 +97,17 @@ change_name "package/luci-app-lucky/po/zh_Hans/lucky.po" "Lucky" "万能工具"
 
 # 修改upnp服务地址
 sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" feeds/luci/applications/luci-app-upnp/htdocs/luci-static/resources/view/upnp/upnp.js
+
+# 自动查找luci-app-ttyd并清理，同时打印被修改的文件名
+echo "--- Cleaning up luci-app-ttyd dependencies ---"
+# 查找所有 Makefile，如果包含 +luci-app-ttyd 就打印并修改
+find ./package ./feeds -name Makefile -type f -exec grep -l " +luci-app-ttyd" {} + | while read -r file; do
+    echo "Patching: $file"
+    sed -i 's/ +luci-app-ttyd//g' "$file"
+done
+# 修改完后必须清理 tmp 目录，否则编译索引不会更新
+rm -rf tmp/
+echo "--- All done! ---"
 
 # 预置编译选项 (写入 .config)
 cat >> .config <<EOF
