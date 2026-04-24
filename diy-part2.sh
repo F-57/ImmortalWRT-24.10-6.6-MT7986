@@ -84,6 +84,7 @@ function git_sparse_clone() {
 # --- 插件集成 ---
 git_sparse_clone main https://github.com/F-57/luci-app luci-app-adguardhome airconnect luci-app-airconnect
 git_sparse_clone main https://github.com/vernesong/openclash luci-app-openclash
+git_sparse_clone main https://github.com/sirpdboy/luci-app-lucky lucky luci-app-lucky
 git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
 
 # 更改菜单名字 参数1是文件路径，参数2是原始文字，参数3是目标文字
@@ -103,6 +104,7 @@ change_name() {
 change_name "feeds/luci/modules/luci-base/po/zh_Hans/base.po" "Processes" "系统进程"
 change_name "feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po" "UPnP IGD & PCP" "端口映射"
 change_name "package/luci-app-openclash/po/zh-cn/openclash.zh-cn.po" "OpenClash" "科学上网"
+change_name "package/luci-app-lucky/po/zh_Hans/lucky.po" "Lucky" "万能工具"
 
 # 修改upnp服务地址
 sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" feeds/luci/applications/luci-app-upnp/htdocs/luci-static/resources/view/upnp/upnp.js
@@ -115,9 +117,9 @@ CONFIG_OPENSSL_OPTIMIZE_SPEED=y
 CONFIG_PACKAGE_kmod-mtd-rw=y
 CONFIG_LUCI_LANG_en=y
 CONFIG_LUCI_LANG_zh_Hans=y
-CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-theme-argon=y
-CONFIG_PACKAGE_luci-app-upnp=y
+CONFIG_PACKAGE_luci-app-lucky=y
+CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-app-adguardhome=y
 CONFIG_PACKAGE_luci-app-airconnect=y
 EOF
