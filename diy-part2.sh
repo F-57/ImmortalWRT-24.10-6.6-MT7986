@@ -60,7 +60,7 @@ echo "--- Cleaning up luci-app-ttyd dependencies ---"
 # 查找所有 Makefile，如果包含 +luci-app-ttyd 就打印并修改
 find ./package ./feeds -name Makefile -type f -exec grep -l " +luci-app-ttyd" {} + | while read -r file; do
     echo "Patching: $file"
-    sed -i 's/+luci-app-ttyd//g' "$file"
+    sed -i 's/ +luci-app-ttyd//g' "$file"
 done
 # 修改完后必须清理 tmp 目录，否则编译索引不会更新
 rm -rf tmp/
