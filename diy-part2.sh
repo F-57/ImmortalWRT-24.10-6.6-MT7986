@@ -94,7 +94,7 @@ change_name() {
 
 change_name "feeds/luci/modules/luci-base/po/zh_Hans/base.po" "Processes" "系统进程"
 change_name "feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po" "UPnP IGD & PCP" "端口映射"
-change_name "package/luci-app-openclash/po/zh-cn/openclash.zh-cn.po" "OpenClash" "科学上网"
+change_name "feeds/luci/applications/luci-app-openclash/po/zh-cn/openclash.zh-cn.po" "OpenClash" "科学上网"
 change_name "package/luci-app-lucky/po/zh_Hans/lucky.po" "Lucky" "万能工具"
 
 # 修改upnp服务地址
