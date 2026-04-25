@@ -100,17 +100,6 @@ change_name "package/luci-app-lucky/po/zh_Hans/lucky.po" "Lucky" "万能工具"
 # 修改upnp服务地址
 sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" feeds/luci/applications/luci-app-upnp/htdocs/luci-static/resources/view/upnp/upnp.js
 
-# 自动查找luci-app-ttyd并清理，同时打印被修改的文件名
-echo "--- Cleaning up luci-app-ttyd dependencies ---"
-# 查找所有 Makefile，如果包含 +luci-app-ttyd 就打印并修改
-find ./package ./feeds -name Makefile -type f -exec grep -l "+luci-app-ttyd" {} + | while read -r file; do
-    echo "Patching: $file"
-    sed -i -E 's/[[:space:]]*\+luci-app-ttyd([[:space:]]|$)//g' "$file"
-done
-# 修改完后必须清理 tmp 目录，否则编译索引不会更新
-rm -rf tmp/
-echo "--- All done! ---"
-
 # 预置编译选项 (写入 .config)
 cat >> .config <<EOF
 CONFIG_CCACHE=y
