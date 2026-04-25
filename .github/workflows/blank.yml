@@ -56,17 +56,6 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /mnt/build_wrt/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: 开启缓存加速 (dl & ccache)
-      uses: actions/cache@main
-      with:
-        path: |
-          /mnt/build_wrt/openwrt/dl
-          ${{ env.CCACHE_DIR }}
-        # 根据配置文件生成 hash，配置文件变了就更新缓存基准
-        key: ${{ runner.os }}-openwrt-${{ env.REPO_BRANCH }}-${{ hashFiles('.config') }}
-        restore-keys: |
-          ${{ runner.os }}-openwrt-${{ env.REPO_BRANCH }}-
-
     - name: 加载自定义 Feeds
       run: |
         cd openwrt
@@ -76,7 +65,7 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: 加载自定义配置
+    - name: 加载自定义配置DIY_P2_SH
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
@@ -102,10 +91,6 @@ jobs:
         make -j$(nproc) || make -j1 V=s
         ccache -s # 打印缓存命中率
         echo "FILE_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
-
-    - name: SSH 链接管理
-      uses: P3TERX/ssh2actions@v1.0.0
-      if: failure() || (github.event.inputs.ssh == 'true')
 
     - name: 整理编译文件
       id: organize
