@@ -103,7 +103,7 @@ sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" feeds/luci/applications/luci-app-u
 # 自动查找luci-app-ttyd并清理，同时打印被修改的文件名
 echo "--- Cleaning up luci-app-ttyd dependencies ---"
 # 查找所有 Makefile，如果包含 +luci-app-ttyd 就打印并修改
-find ./package ./feeds -name Makefile -type f -exec grep -l " +luci-app-ttyd" {} + | while read -r file; do
+find ./package ./feeds -name Makefile -type f -exec grep -l "+luci-app-ttyd" {} + | while read -r file; do
     echo "Patching: $file"
     sed -i 's/+luci-app-ttyd//g' "$file"
 done
