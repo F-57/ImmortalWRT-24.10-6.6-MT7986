@@ -1,11 +1,10 @@
-name: padavanonly AX6000 (24.10)
-
+name: Build Redmi AX6000 24.10
 on:
   repository_dispatch:
   workflow_dispatch:
     inputs:
-      ssh:
-        description: '是否开启 SSH 调试'
+      ssh_connection:
+        description: '是否开启 SSH 调试 (true/false)'
         required: false
         default: 'false'
 
@@ -19,40 +18,77 @@ env:
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
+  TARGET: AX6000_mt7986
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
 jobs:
-  build:
+  cleanup:
     runs-on: ubuntu-latest
-
     steps:
-    - name: 检出项目代码
+    - name: 检查分支
       uses: actions/checkout@main
 
-    - name: 初始化编译环境
+    - name: 安装编译环境
       env:
-        DEBIAN_FRONTEND: noninteractive
+          DEBIAN_FRONTEND: noninteractive
       run: |
-        # 清理无用文件释放空间
-        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/powershell /usr/local/lib/node_modules
-        sudo -E apt -yqq purge firefox
-        sudo -E apt -yqq update
-        sudo -E apt -yqq full-upgrade
-        sudo -E apt -yqq autoremove --purge
-        sudo -E apt -yqq autoclean
-        sudo -E apt -yqq clean
-        sudo -E apt -yqq install dos2unix libfuse-dev
-        sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
-        sudo -E systemctl daemon-reload
-        sudo timedatectl set-timezone "$TZ"
-        sudo mkdir -p /mnt/build_wrt
-        sudo chown $USER:$GROUPS /mnt/build_wrt
-        echo "环境初始化完成。"
+          sudo -E apt -yqq purge firefox
+          sudo -E apt -yqq update
+          sudo -E apt -yqq full-upgrade
+          sudo -E apt -yqq autoremove --purge
+          sudo -E apt -yqq autoclean
+          sudo -E apt -yqq clean
+          sudo -E apt -yqq install dos2unix libfuse-dev
+          sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+          sudo -E systemctl daemon-reload
+          sudo timedatectl set-timezone "$TZ"
+          sudo mkdir -p /mnt/wrt
+          sudo chown $USER:$GROUPS /mnt/wrt
 
-    - name: 克隆源码
-      working-directory: /mnt/build_wrt
+    - name: 下载固件源码
+      working-directory: /mnt/wrt
       run: |
+        df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /mnt/build_wrt/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /mnt/wrt/openwrt $GITHUB_WORKSPACE/openwrt
+
+    - name: 处理脚本格式
+      run: |
+        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
+
+    - name: 检查并读取缓存
+      id: check-cache
+      if: env.WRT_TEST != 'true'
+      uses: actions/cache@main
+      with:
+        # 注意：你需要确保 env 中定义了这些变量，或者将 key 修改为固定值
+        key: ${{ env.TARGET }}-${{ env.REPO_BRANCH }}-${{ hashFiles('.config') }}
+        restore-keys: |
+          ${{ env.TARGET }}-${{ env.REPO_BRANCH }}-
+        path: |
+          ./openwrt/.ccache
+          ./openwrt/staging_dir/host*
+          ./openwrt/staging_dir/tool*
+
+    - name: 维护与更新缓存
+      if: env.WRT_TEST != 'true' && !cancelled()
+      run: |
+      
+        if [ -d "./openwrt/staging_dir" ]; then
+          find "./openwrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
+            find "$DIR" -type f -exec touch {} +
+          done
+          mkdir -p ./openwrt/tmp && echo "1" > ./openwrt/tmp/.build
+          echo "已成功跳过工具链!"
+        else
+          echo "缓存丢失!"
+        fi
+
+        # 清理旧缓存（需要 GITHUB_TOKEN 权限）
+        if [ "${{ steps.check-cache.outputs.cache-hit }}" != 'true' ]; then
+          gh cache list --key "${{ env.TARGET }}-${{ env.REPO_BRANCH }}" | cut -f 1 | xargs -r -n 1 gh cache delete || true
+          echo "旧缓存清理完毕!"
+        fi
 
     - name: 自定义 feeds & DIY_P1_SH
       run: |
@@ -67,15 +103,15 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: 加载自定义配置DIY_P2_SH
+    - name: 加载配置 & DIY_P2_SH
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x $DIY_P2_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
-        
-    - name: 下载源码包 (dl)
+
+    - name: 下载安装包
       id: package
       run: |
         cd openwrt
@@ -84,7 +120,8 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 开始编译
+    - name: 编译固件
+      id: compile
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
@@ -92,7 +129,11 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "FILE_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+        echo "FILE_DATE=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_ENV
+
+    - name: 查看磁盘使用情况
+      if: (!cancelled())
+      run: df -hT
 
     - name: 整理固件
       id: organize
@@ -102,6 +143,13 @@ jobs:
         rm -rf packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 上传 Artifact
+      uses: actions/upload-artifact@v4
+      if: steps.organize.outputs.status == 'success'
+      with:
+        name: OpenWrt_AX6000${{ env.FILE_DATE }}
+        path: ${{ env.FIRMWARE }}
 
     - name: 发布 Release
       uses: ncipollo/release-action@main
