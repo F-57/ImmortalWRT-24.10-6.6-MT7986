@@ -39,7 +39,6 @@ else
 fi
 
 # 删除系统预制包
-rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-openclash
 
 # Git稀疏克隆，只克隆指定目录到本地
