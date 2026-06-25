@@ -109,3 +109,5 @@ if [ -f "$RUST_FILE" ]; then
 
 	cd $PKG_PATH && echo "rust has been fixed!"
 fi
+
+make package/feeds/packages/libffi/clean
