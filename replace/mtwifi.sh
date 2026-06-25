@@ -59,7 +59,7 @@ detect_mtwifi() {
 					set wireless.default_${dev}.ssid=${ssid}
 					set wireless.default_${dev}.encryption=sae-mixed
 					set wireless.default_${dev}.key=cw010203
-					set wireless.default_${dev}.key_mgmt='WPA2PSK WPA3SAE'
+					set wireless.default_${dev}.key_mgmt=WPA2PSK WPA3SAE
 					set wireless.default_${dev}.kick_assoc_rssi=-75
 EOF
 				uci -q commit wireless
