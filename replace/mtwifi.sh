@@ -20,7 +20,7 @@ detect_mtwifi() {
 					hwmode="11g"
 					htmode="HE40"
 					htbsscoex="1"
-					ssid="ImmortalWrt-2.4G"
+					ssid="OP_Network"
 					dbdc_main="1"
 					txpower="100"
 					channel="auto"
@@ -29,7 +29,7 @@ detect_mtwifi() {
 					hwmode="11a"
 					htmode="HE160"
 					htbsscoex="0"
-					ssid="ImmortalWrt-5G"
+					ssid="OP_Network"
 					channel="36"
 					txpower="100"
 					dbdc_main="0"
@@ -47,7 +47,9 @@ detect_mtwifi() {
 					set wireless.${dev}.country=CN
 					set wireless.${dev}.mu_beamformer=1
 					set wireless.${dev}.noscan=${htbsscoex}
-					set wireless.${dev}.wapp=0
+					set wireless.${dev}.wapp=1
+					set wireless.${dev}.ieee80211k=1
+					set wireless.${dev}.ieee80211v=1
 					set wireless.${dev}.serialize=1
 					
 					set wireless.default_${dev}=wifi-iface
@@ -55,7 +57,10 @@ detect_mtwifi() {
 					set wireless.default_${dev}.network=lan
 					set wireless.default_${dev}.mode=ap
 					set wireless.default_${dev}.ssid=${ssid}
-					set wireless.default_${dev}.encryption=none
+					set wireless.default_${dev}.encryption=sae-mixed
+					set wireless.default_${dev}.key=cw010203
+					set wireless.default_${dev}.key_mgmt='WPA2PSK WPA3SAE'
+					set wireless.default_${dev}.kick_assoc_rssi=-75
 EOF
 				uci -q commit wireless
 			}
