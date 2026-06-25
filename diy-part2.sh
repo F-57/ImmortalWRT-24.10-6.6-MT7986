@@ -2,7 +2,7 @@
 # --- 基础系统设置 (IP/主机名) ---
 CFG_FILE="package/base-files/files/bin/config_generate"
 WRT_IP="10.0.0.1"
-WRT_NAME="AX6000"
+WRT_NAME="Redmi_AX6000"
 
 if [ -f "$CFG_FILE" ]; then
     # 修改默认 IP 地址
@@ -15,14 +15,14 @@ fi
 
 # --- Wi-Fi 相关设置 (闭源驱动 mtwifi) ---
 WIFI_FILE="package/mtk/applications/mtwifi-cfg/files/mtwifi.sh"
-WIFI_SSID="Ax6000"
+WIFI_SSID="OP_Network"
 WIFI_PASS="cw010203"
 
 if [ -f "$WIFI_FILE" ]; then
     # 修改 Wi-Fi 信道为自动
     sed -i "s/channel=.*/channel='auto'/g" $WIFI_FILE
     # 修改默认 SSID (将默认的 ImmortalWrt 替换为你的变量)
-    sed -i "s/ImmortalWrt/$WIFI_SSID/g" $WIFI_FILE
+    sed -i "s/ImmortalWrt-[0-9.]*G/$WIFI_SSID/g" $WIFI_FILE
     # 修改加密方式为 WPA3/WPA2 混合 (sae-mixed)
     sed -i "s/encryption=.*/encryption='sae-mixed'/g" $WIFI_FILE
     # 在加密方式行后插入 Wi-Fi 密码
