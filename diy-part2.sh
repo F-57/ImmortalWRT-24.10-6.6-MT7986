@@ -15,26 +15,13 @@ fi
 
 # --- Wi-Fi 相关设置 (闭源驱动 mtwifi) ---
 WIFI_FILE="package/mtk/applications/mtwifi-cfg/files/mtwifi.sh"
-WIFI_SSID="OP_Network"
-WIFI_PASS="cw010203"
+    cp -f $GITHUB_WORKSPACE/replace/mtwifi.sh $WIFI_FILE
+    echo "✅ RAM/WiFi: 已使用本地文件覆盖Wi-Fi 相关设置"
 
-if [ -f "$WIFI_FILE" ]; then
-    # 修改 Wi-Fi 信道为自动
-    sed -i "s/channel=.*/channel='auto'/g" $WIFI_FILE
-    # 修改默认 SSID (将默认的 ImmortalWrt 替换为你的变量)
-    sed -i "s/ImmortalWrt-[0-9.]*G/$WIFI_SSID/g" $WIFI_FILE
-    # 修改加密方式为 WPA3/WPA2 混合 (sae-mixed)
-    sed -i "s/encryption=.*/encryption='sae-mixed'/g" $WIFI_FILE
-    # 在加密方式行后插入 Wi-Fi 密码
-    sed -i "/set wireless.default_\${dev}.encryption='sae-mixed'/a \\\t\t\t\t\t\set wireless.default_\${dev}.key='$WIFI_PASS'" $WIFI_FILE
-    echo "Wi-Fi 配置已更新."
-fi
-
-# 定义文件路径
+# 修改512存储 1024内存
 DTS_FILE="target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts"
 DTSI_FILE="target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000.dtsi"
 
-# --- 1. 512MB 闪存大分区布局适配 (修改 .dts) ---
 if [ -f "$DTS_FILE" ]; then
     # 修正 UBI 分区起始地址为 6MB (0x600000)，长度扩展为 490MB (0x1ea00000)
     sed -i '/partition@600000/,/};/ { /reg =/ s/<0x[0-9a-fA-F]* 0x[0-9a-fA-F]*>/<0x600000 0x1ea00000>/; }' "$DTS_FILE"
@@ -43,7 +30,7 @@ else
     echo "警告: 未找到 $DTS_FILE，请检查路径。"
 fi
 
-# 2. 执行文件替换 (1GB RAM & WiFi 补丁)
+# 执行文件替换 (1GB RAM & WiFi 补丁)
 if [ -f "$GITHUB_WORKSPACE/replace/mt7986a-xiaomi-redmi-router-ax6000.dtsi" ]; then
     cp -f $GITHUB_WORKSPACE/replace/mt7986a-xiaomi-redmi-router-ax6000.dtsi $DTSI_FILE
     echo "✅ RAM/WiFi: 已使用本地文件覆盖源码 DTSi"
