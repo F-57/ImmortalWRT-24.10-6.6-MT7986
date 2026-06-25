@@ -90,11 +90,9 @@ sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" feeds/luci/applications/luci-app-u
 # 预置编译选项 (写入 .config)
 cat >> .config <<EOF
 CONFIG_CCACHE=y
-CONFIG_KERNEL_DEBUG_INFO=n
-CONFIG_OPENSSL_OPTIMIZE_SPEED=y
-CONFIG_PACKAGE_kmod-mtd-rw=y
 CONFIG_LUCI_LANG_en=y
 CONFIG_LUCI_LANG_zh_Hans=y
+CONFIG_PACKAGE_kmod-mtd-rw=y
 CONFIG_PACKAGE_luci-theme-argon=y
 CONFIG_PACKAGE_luci-app-lucky=y
 CONFIG_PACKAGE_luci-app-openclash=y
