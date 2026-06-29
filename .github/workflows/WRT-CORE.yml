@@ -1,104 +1,92 @@
-name: Build Redmi AX6000 24.10
+#
+# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+#
+
+name: Build OpenWrt
+
 on:
   repository_dispatch:
   workflow_dispatch:
     inputs:
-      ssh_connection:
-        description: '是否开启 SSH 调试 (true/false)'
+      ssh:
+        description: 'SSH connection to Actions'
         required: false
         default: 'false'
 
 env:
-  REPO_URL: https://github.com/Yuzhii0718/immortalwrt-mt798x-6.6-padavanonly
-  REPO_BRANCH: openwrt-24.10-6.6
+  REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x-24.10
+  REPO_BRANCH: 'openwrt-24.10-6.6'
+  REPO_TAG: v23.05.3
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
+  UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: false
+  UPLOAD_WETRANSFER: false
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
-  TARGET: AX6000_mt7986
-  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
 jobs:
-  cleanup:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-    - name: 检查分支
+    - name: 检出代码
       uses: actions/checkout@main
 
     - name: 初始化编译环境
       env:
-          DEBIAN_FRONTEND: noninteractive
+        DEBIAN_FRONTEND: noninteractive
       run: |
-          sudo -E apt-get -qq update
-          sudo bash -c 'bash <(curl -s https://build-scripts.immortalwrt.org/init_build_environment.sh)'
-          sudo -E apt-get -qq autoremove --purge
-          sudo -E apt-get -qq clean
-          sudo timedatectl set-timezone "$TZ"
-          sudo mkdir -p /mnt/wrt
-          sudo chown $USER:$GROUPS /mnt/wrt
-          
-    - name: 下载固件源码
-      working-directory: /mnt/wrt
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo bash -c 'bash <(curl -s https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+
+    - name: 克隆源码
+      working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /mnt/wrt/openwrt $GITHUB_WORKSPACE/openwrt
+        git clone -b $REPO_BRANCH --single-branch --filter=blob:none $REPO_URL openwrt
+        cd openwrt
+        # git checkout $REPO_TAG
+        rm -rf .git
+        cd ../
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: 处理脚本格式
-      run: |
-        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
-
-    - name: 检查并读取缓存
-      id: check-cache
-      if: env.WRT_TEST != 'true'
-      uses: actions/cache@main
-      with:
-        # 注意：你需要确保 env 中定义了这些变量，或者将 key 修改为固定值
-        key: ${{ env.TARGET }}-${{ env.REPO_BRANCH }}-${{ hashFiles('.config') }}
-        restore-keys: |
-          ${{ env.TARGET }}-${{ env.REPO_BRANCH }}-
-        path: |
-          ./openwrt/.ccache
-          ./openwrt/staging_dir/host*
-          ./openwrt/staging_dir/tool*
-
-    - name: 维护与更新缓存
-      if: env.WRT_TEST != 'true' && !cancelled()
-      run: |
-      
-        if [ -d "./openwrt/staging_dir" ]; then
-          find "./openwrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
-            find "$DIR" -type f -exec touch {} +
-          done
-          mkdir -p ./openwrt/tmp && echo "1" > ./openwrt/tmp/.build
-          echo "已成功跳过工具链!"
-        else
-          echo "缓存丢失!"
-        fi
-
-        # 清理旧缓存（需要 GITHUB_TOKEN 权限）
-        if [ "${{ steps.check-cache.outputs.cache-hit }}" != 'true' ]; then
-          gh cache list --key "${{ env.TARGET }}-${{ env.REPO_BRANCH }}" | cut -f 1 | xargs -r -n 1 gh cache delete || true
-          echo "旧缓存清理完毕!"
-        fi
-
-    - name: 自定义 feeds & DIY_P1_SH
+    - name: 加载自定义插件源
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
-    - name: 更新 feeds
+    - name: 更新插件源
+      run: cd openwrt && ./scripts/feeds update -a
+
+    - name: 安装插件源
       run: |
         cd openwrt
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
 
-    - name: 加载配置 & DIY_P2_SH
+        # golang update
+        rm -rf feeds/packages/lang/golang
+        git clone https://github.com/sbwml/packages_lang_golang feeds/packages/lang/golang
+  
+        ./scripts/feeds install -a && ./scripts/feeds install -a && ./scripts/feeds install -a
+
+    - name: 加载自定义配置
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
@@ -106,7 +94,24 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
-    - name: 下载安装包
+    - name: SSH connection to Actions
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    
+    - name: Save .config
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      id: config
+      run: |
+        cd openwrt
+
+        mkdir -p bin/targets/test/test
+        cp .config bin/targets/test/test/config
+
+    - name: Download package
+      if: github.event.inputs.ssh  != 'true'
       id: package
       run: |
         cd openwrt
@@ -115,42 +120,103 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 编译固件
+    - name: Compile the firmware
       id: compile
+      if: github.event.inputs.ssh  != 'true'
       run: |
         cd openwrt
+        
         echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 V=s
-        echo "status=success" >> $GITHUB_OUTPUT
+        make -j$(nproc) || make -j1 || make -j1 V=s
+        
+        
+        # echo -e "1 thread compile"
+        # make -j1 || make -j1 V=s
+        
+        echo "::set-output name=status::success"
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "FILE_DATE=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_ENV
+        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
-    - name: 查看磁盘使用情况
+    - name: Check space usage
       if: (!cancelled())
       run: df -hT
 
-    - name: 整理固件
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      with:
+        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        path: openwrt/bin
+
+    - name: Organize files
       id: organize
-      if: steps.compile.outputs.status == 'success'
+      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "status=success" >> $GITHUB_OUTPUT
+        echo "::set-output name=status::success"
 
-    - name: 上传 Artifact
-      uses: actions/upload-artifact@v4
-      if: steps.organize.outputs.status == 'success'
+    - name: Upload firmware directory
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: OpenWrt_AX6000${{ env.FILE_DATE }}
+        name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
 
-    - name: 发布 Release
-      uses: ncipollo/release-action@main
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true'
+    - name: Upload firmware to cowtransfer
+      id: cowtransfer
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+        # echo "{url}={$(cat cowtransfer.log | grep https | cut -f3 -d" ")}" >> $GITHUB_OUTPUT
+        echo "::set-output name=url::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
+        
+    - name: Upload firmware to WeTransfer
+      id: wetransfer
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
+        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+        # echo "{url}={$(cat wetransfer.log | grep https | cut -f3 -d" ")}" >> $GITHUB_OUTPUT
+        echo "::set-output name=url::$(cat wetransfer.log | grep https | cut -f3 -d" ")"
+        
+    - name: Generate release tag
+      id: tag
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      run: |
+        # echo "{release_tag}={$(date +"%Y.%m.%d-%H%M")}" >> $GITHUB_OUTPUT
+        echo "::set-output name=release_tag::$(date +"%Y.%m.%d-%H%M")"
+        touch release.txt
+        [ $UPLOAD_COWTRANSFER = true ] && echo "🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
+        [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
+        # echo "{status}={success}" >> $GITHUB_OUTPUT
+        echo "::set-output name=status::success"
+        
+    - name: Upload firmware to release
+      uses: softprops/action-gh-release@v2
+      if: steps.tag.outputs.status == 'success' && !cancelled() && github.event.inputs.ssh == 'false'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag: ${{ env.FILE_DATE }}-ax6000
-        artifacts: ${{ env.FIRMWARE }}/*
-        allowUpdates: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        body_path: release.txt
+        files: ${{ env.FIRMWARE }}/*
+
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@v2.0.6
+      with:
+        retain_days: 30
+        keep_minimum_runs: 8
+
+    - name: Remove old Releases
+      uses: dev-drprasad/delete-older-releases@v0.3.4
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      with:
+        keep_latest: 10
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
