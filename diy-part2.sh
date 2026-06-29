@@ -14,9 +14,24 @@ if [ -f "$CFG_FILE" ]; then
 fi
 
 # --- Wi-Fi 相关设置 (闭源驱动 mtwifi) ---
+WRT_SSID="Pdx_Nerwork"
+WRT_WORD="cw010203"
 WIFI_FILE="package/mtk/applications/mtwifi-cfg/files/mtwifi.sh"
-    cp -f $GITHUB_WORKSPACE/replace/mtwifi.sh $WIFI_FILE
-    echo "✅ RAM/WiFi: 已使用本地文件覆盖Wi-Fi 相关设置"
+
+if [ -f "$WIFI_FILE" ]; then
+    sed -i "s/ImmortalWrt.*/$WRT_SSID/g" $WIFI_FILE
+    sed -i "s/encryption=.*/encryption='sae-mixed'/g" $WIFI_FILE
+    sed -i "/set wireless.default_\${dev}.encryption='sae-mixed'/a \\\t\t\t\t\t\set wireless.default_\${dev}.key='$WRT_WORD'" $WIFI_FILE
+    echo "Wi-Fi 相关设置已更新."
+fi
+
+# --- UPnP 服务设置 ---
+UPNP_FILE="feeds/luci/applications/luci-app-upnp/htdocs/luci-static/resources/view/upnp/upnp.js"
+if [ -f "$UPNP_FILE" ]; then
+    # 修改 UPnP 默认服务地址
+    sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $UPNP_FILE
+    echo "UPnP 服务地址已更新."
+fi
 
 # 修改512存储 1024内存
 DTS_FILE="target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts"
@@ -83,9 +98,6 @@ change_name "feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po" "UPnP IGD
 change_name "feeds/luci/applications/luci-app-openclash/po/zh-cn/openclash.zh-cn.po" "OpenClash" "科学上网"
 change_name "package/luci-app-lucky/po/zh_Hans/lucky.po" "Lucky" "路由助手"
 
-# 修改upnp服务地址
-sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" feeds/luci/applications/luci-app-upnp/htdocs/luci-static/resources/view/upnp/upnp.js
-
 # 预置编译选项 (写入 .config)
 cat >> .config <<EOF
 CONFIG_CCACHE=y
@@ -99,13 +111,3 @@ CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-app-adguardhome=y
 CONFIG_PACKAGE_luci-app-airconnect=y
 EOF
-
-#修复Rust编译失败
-RUST_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/rust/Makefile")
-if [ -f "$RUST_FILE" ]; then
-	echo " "
-
-	sed -i 's/ci-llvm=true/ci-llvm=false/g' $RUST_FILE
-
-	cd $PKG_PATH && echo "rust has been fixed!"
-fi
