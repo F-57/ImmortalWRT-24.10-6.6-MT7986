@@ -2,7 +2,7 @@
 # --- 基础系统设置 (IP/主机名) ---
 CFG_FILE="package/base-files/files/bin/config_generate"
 WRT_IP="10.0.0.1"
-WRT_NAME="Redmi_AX6000"
+WRT_NAME="Pdx_Network"
 
 if [ -f "$CFG_FILE" ]; then
     # 修改默认 IP 地址
@@ -14,7 +14,7 @@ if [ -f "$CFG_FILE" ]; then
 fi
 
 # --- Wi-Fi 相关设置 (闭源驱动 mtwifi) ---
-WRT_SSID="Pdx_Nerwork"
+WRT_SSID="Pdx_Network"
 WRT_WORD="cw010203"
 WIFI_FILE="package/mtk/applications/mtwifi-cfg/files/mtwifi.sh"
 
