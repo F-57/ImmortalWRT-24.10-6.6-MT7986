@@ -23,6 +23,7 @@ env:
   REPO_URL: https://github.com/Yuzhii0718/immortalwrt-mt798x-6.6-padavanonly
   REPO_BRANCH: 'openwrt-24.10-6.6'
   REPO_TAG: v23.05.3
+  TARGET: Redmi-AX6000
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
@@ -66,6 +67,40 @@ jobs:
         cd ../
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
+    - name: 检查并读取缓存
+      id: check-cache
+      if: env.WRT_TEST != 'true'
+      uses: actions/cache@main
+      with:
+        # 注意：你需要确保 env 中定义了这些变量，或者将 key 修改为固定值
+        key: ${{ env.TARGET }}-${{ env.REPO_BRANCH }}-${{ hashFiles('.config') }}
+        restore-keys: |
+          ${{ env.TARGET }}-${{ env.REPO_BRANCH }}-
+        path: |
+          ./openwrt/.ccache
+          ./openwrt/staging_dir/host*
+          ./openwrt/staging_dir/tool*
+
+    - name: 维护与更新缓存
+      if: env.WRT_TEST != 'true' && !cancelled()
+      run: |
+      
+        if [ -d "./openwrt/staging_dir" ]; then
+          find "./openwrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
+            find "$DIR" -type f -exec touch {} +
+          done
+          mkdir -p ./openwrt/tmp && echo "1" > ./openwrt/tmp/.build
+          echo "已成功跳过工具链!"
+        else
+          echo "缓存丢失!"
+        fi
+
+        # 清理旧缓存（需要 GITHUB_TOKEN 权限）
+        if [ "${{ steps.check-cache.outputs.cache-hit }}" != 'true' ]; then
+          gh cache list --key "${{ env.TARGET }}-${{ env.REPO_BRANCH }}" | cut -f 1 | xargs -r -n 1 gh cache delete || true
+          echo "旧缓存清理完毕!"
+        fi
+        
     - name: 加载自定义插件源
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
@@ -79,7 +114,6 @@ jobs:
     - name: 安装插件源
       run: |
         cd openwrt
-
         # golang update
         rm -rf feeds/packages/lang/golang
         git clone https://github.com/sbwml/packages_lang_golang feeds/packages/lang/golang
