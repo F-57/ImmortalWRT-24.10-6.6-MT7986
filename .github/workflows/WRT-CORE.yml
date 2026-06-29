@@ -20,7 +20,7 @@ on:
         default: 'false'
 
 env:
-  REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x-24.10
+  REPO_URL: https://github.com/Yuzhii0718/immortalwrt-mt798x-6.6-padavanonly
   REPO_BRANCH: 'openwrt-24.10-6.6'
   REPO_TAG: v23.05.3
   FEEDS_CONF: feeds.conf.default
