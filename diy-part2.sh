@@ -118,7 +118,6 @@ CONFIG_LUCI_LANG_en=y
 CONFIG_LUCI_LANG_zh_Hans=y
 CONFIG_PACKAGE_kmod-mtd-rw=y
 CONFIG_PACKAGE_luci-theme-shadcn=y
-CONFIG_PACKAGE_luci-app-upnp=y
 CONFIG_PACKAGE_luci-app-lucky=y
 CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-app-adguardhome=y
