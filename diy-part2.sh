@@ -33,24 +33,13 @@ if [ -f "$UPNP_FILE" ]; then
     echo "UPnP 服务地址已更新."
 fi
 
-# 修改512存储 1024内存
+# 修改512存储
 DTS_FILE="target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts"
-DTSI_FILE="target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000.dtsi"
-
 if [ -f "$DTS_FILE" ]; then
-    # 修正 UBI 分区起始地址为 6MB (0x600000)，长度扩展为 490MB (0x1ea00000)
     sed -i '/partition@600000/,/};/ { /reg =/ s/<0x[0-9a-fA-F]* 0x[0-9a-fA-F]*>/<0x600000 0x1ea00000>/; }' "$DTS_FILE"
     echo "Flash: 已成功修改 .dts 文件，适配 512MB 闪存布局。"
 else
     echo "警告: 未找到 $DTS_FILE，请检查路径。"
-fi
-
-# 执行文件替换 (1GB RAM & WiFi 补丁)
-if [ -f "$GITHUB_WORKSPACE/replace/mt7986a-xiaomi-redmi-router-ax6000.dtsi" ]; then
-    cp -f $GITHUB_WORKSPACE/replace/mt7986a-xiaomi-redmi-router-ax6000.dtsi $DTSI_FILE
-    echo "✅ RAM/WiFi: 已使用本地文件覆盖源码 DTSi"
-else   
-    echo "❌ 错误: 在 replace/ 目录下未找到补丁文件，请检查仓库路径"
 fi
 
 # 删除系统预制包
