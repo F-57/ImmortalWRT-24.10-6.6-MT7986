@@ -87,19 +87,6 @@ change_name "feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po" "UPnP IGD
 change_name "feeds/luci/applications/luci-app-openclash/po/zh-cn/openclash.zh-cn.po" "OpenClash" "科学上网"
 change_name "package/luci-app-lucky/po/zh_Hans/lucky.po" "Lucky" "路由助手"
 
-# 预置编译选项 (写入 .config)
-cat >> .config <<EOF
-CONFIG_LUCI_LANG_en=y
-CONFIG_LUCI_LANG_zh_Hans=y
-CONFIG_PACKAGE_kmod-mtd-rw=y
-CONFIG_PACKAGE_luci-theme-shadcn=y
-CONFIG_PACKAGE_luci-app-upnp=y
-CONFIG_PACKAGE_luci-app-lucky=y
-CONFIG_PACKAGE_luci-app-openclash=y
-CONFIG_PACKAGE_luci-app-adguardhome=y
-CONFIG_PACKAGE_luci-app-airconnect=y
-EOF
-
 #修复Rust编译失败
 RUST_FILE=$(find feeds/packages/lang/rust/ -maxdepth 2 -type f -name "Makefile" 2>/dev/null)
 if [ -f "$RUST_FILE" ]; then
@@ -116,11 +103,15 @@ if [ -f "$TS_FILE" ]; then
 	echo "TailScale 配置文件冲突已修复！"
 fi
 
-# 修复 libffi 编译时 cp 通配符找不到 fficonfig.h 的问题
-LIBFFI_FILE=$(find feeds/packages/libs/libffi/ -maxdepth 2 -type f -name "Makefile" 2>/dev/null)
-if [ -f "$LIBFFI_FILE" ]; then
-    echo "正在修复 libffi 通配符复制错误..."
-    # 将 Makefile 里的 aarch64-openwrt-linux*/ 替换为能自动匹配实际目录的表达式，或者直接修正
-    sed -i 's/aarch64-openwrt-linux\*\//aarch64-openwrt-linux-musl\//g' "$LIBFFI_FILE"
-    echo "libffi 路径问题已修复！"
-fi
+# 预置编译选项 (写入 .config)
+cat >> .config <<EOF
+CONFIG_LUCI_LANG_en=y
+CONFIG_LUCI_LANG_zh_Hans=y
+CONFIG_PACKAGE_kmod-mtd-rw=y
+CONFIG_PACKAGE_luci-theme-shadcn=y
+CONFIG_PACKAGE_luci-app-upnp=y
+CONFIG_PACKAGE_luci-app-lucky=y
+CONFIG_PACKAGE_luci-app-openclash=y
+CONFIG_PACKAGE_luci-app-adguardhome=y
+CONFIG_PACKAGE_luci-app-airconnect=y
+EOF
