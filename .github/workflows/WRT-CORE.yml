@@ -167,9 +167,13 @@ jobs:
         # echo -e "1 thread compile"
         # make -j1 || make -j1 V=s
         
-        echo "status=success" >> $GITHUB_OUTPUT
+        # 兼容 24.10 分支新版命名的提取逻辑
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        if [ -s DEVICE_NAME ]; then
+            # 清理可能导致 env 报错的特殊后缀格式
+            CLEAN_NAME=$(cat DEVICE_NAME | sed 's/xiaomi_redmi-router-ax6000-ubootmod/xiaomi_redmi-router-ax6000/g')
+            echo "DEVICE_NAME=_$CLEAN_NAME" >> $GITHUB_ENV
+        fi
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
     - name: 检查磁盘空间占用
