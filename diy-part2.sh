@@ -115,3 +115,12 @@ if [ -f "$TS_FILE" ]; then
 	sed -i '/\/files/d' "$TS_FILE"
 	echo "TailScale 配置文件冲突已修复！"
 fi
+
+# 修复 libffi 编译时 cp 通配符找不到 fficonfig.h 的问题
+LIBFFI_FILE=$(find feeds/packages/libs/libffi/ -maxdepth 2 -type f -name "Makefile" 2>/dev/null)
+if [ -f "$LIBFFI_FILE" ]; then
+    echo "正在修复 libffi 通配符复制错误..."
+    # 将 Makefile 里的 aarch64-openwrt-linux*/ 替换为能自动匹配实际目录的表达式，或者直接修正
+    sed -i 's/aarch64-openwrt-linux\*\//aarch64-openwrt-linux-musl\//g' "$LIBFFI_FILE"
+    echo "libffi 路径问题已修复！"
+fi
