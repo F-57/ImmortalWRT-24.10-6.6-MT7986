@@ -19,7 +19,7 @@ WRT_WORD="cw010203"
 WIFI_FILE="package/mtk/applications/mtwifi-cfg/files/mtwifi.sh"
 
 if [ -f "$WIFI_FILE" ]; then
-    sed -i "s/ImmortalWrt.*/$WRT_SSID/g" $WIFI_FILE
+    sed -i "s/ImmortalWrt/$WRT_SSID/g" $WIFI_FILE
     sed -i "s/encryption=.*/encryption='sae-mixed'/g" $WIFI_FILE
     sed -i "/set wireless.default_\${dev}.encryption='sae-mixed'/a \\\t\t\t\t\t\set wireless.default_\${dev}.key='$WRT_WORD'" $WIFI_FILE
     echo "Wi-Fi 相关设置已更新."
