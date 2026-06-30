@@ -99,3 +99,19 @@ CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-app-adguardhome=y
 CONFIG_PACKAGE_luci-app-airconnect=y
 EOF
+
+#修复Rust编译失败
+RUST_FILE=$(find feeds/packages/lang/rust/ -maxdepth 2 -type f -name "Makefile" 2>/dev/null)
+if [ -f "$RUST_FILE" ]; then
+	echo "Found Rust Makefile at $RUST_FILE, fixing..."
+	sed -i 's/ci-llvm=true/ci-llvm=false/g' "$RUST_FILE"
+	echo "Rust 编译问题已修复！"
+fi
+
+#修复TailScale配置文件冲突
+TS_FILE=$(find feeds/packages/net/tailscale/ -maxdepth 2 -type f -name "Makefile" 2>/dev/null)
+if [ -f "$TS_FILE" ]; then
+	echo "Found TailScale Makefile at $TS_FILE, fixing..."
+	sed -i '/\/files/d' "$TS_FILE"
+	echo "TailScale 配置文件冲突已修复！"
+fi
