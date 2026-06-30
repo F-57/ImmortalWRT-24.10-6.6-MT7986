@@ -244,13 +244,13 @@ jobs:
     - name: 删除历史工作流记录
       uses: Mattraks/delete-workflow-runs@v2.0.6
       with:
-        retain_days: 30
-        keep_minimum_runs: 8
+        retain_days: 7
+        keep_minimum_runs: 1
 
     - name: 清理历史 Release 发布
       uses: dev-drprasad/delete-older-releases@v0.3.4
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
-        keep_latest: 10
+        keep_latest: 2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
