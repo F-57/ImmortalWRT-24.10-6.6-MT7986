@@ -103,6 +103,12 @@ if [ -f "$TS_FILE" ]; then
 	echo "TailScale 配置文件冲突已修复！"
 fi
 
+# 强行替换 libffi 为官方上游最新修复版本，规避 24.10 分支通配符 Bug
+rm -rf feeds/packages/libs/libffi
+git clone https://github.com/openwrt/packages.git tmp_packages --depth=1
+cp -r tmp_packages/libs/libffi feeds/packages/libs/libffi
+rm -rf tmp_packages
+
 # 预置编译选项 (写入 .config)
 cat >> .config <<EOF
 CONFIG_CCACHE=y
