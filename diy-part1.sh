@@ -15,6 +15,3 @@
 
 # Add a feed source
 #echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall' >>feeds.conf.default
-
-# 删除luci-app-turboacc-mtk中luci-app-ttyd依赖
-sed -i 's/ +luci-app-ttyd//g' "package/mtk/applications/luci-app-turboacc-mtk/Makefile"
