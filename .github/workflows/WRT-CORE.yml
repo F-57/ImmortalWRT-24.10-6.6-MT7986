@@ -79,6 +79,7 @@ jobs:
           ./openwrt/.ccache
           ./openwrt/staging_dir/host*
           ./openwrt/staging_dir/tool*
+        save-always: true
 
     - name: 维护与更新缓存
       if: env.WRT_TEST != 'true' && !cancelled()
