@@ -9,7 +9,6 @@
 #
 
 name: Build OpenWrt
-
 on:
   repository_dispatch:
   workflow_dispatch:
@@ -29,8 +28,6 @@ env:
   DIY_P2_SH: diy-part2.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_COWTRANSFER: false
-  UPLOAD_WETRANSFER: false
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
 
@@ -68,7 +65,6 @@ jobs:
 
     - name: 检查并读取缓存
       id: check-cache
-      if: env.WRT_TEST != 'true'
       uses: actions/cache@main
       with:
         # 注意：你需要确保 env 中定义了这些变量，或者将 key 修改为固定值
@@ -81,19 +77,17 @@ jobs:
           ./openwrt/staging_dir/tool*
 
     - name: 维护与更新缓存
-      if: env.WRT_TEST != 'true' && !cancelled()
-      run: |
-      
+      if: !cancelled()
+      run: |      
         if [ -d "./openwrt/staging_dir" ]; then
           find "./openwrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
-            find "$DIR" -type f -exec touch {} +
+          find "$DIR" -type f -exec touch {} +
           done
           mkdir -p ./openwrt/tmp && echo "1" > ./openwrt/tmp/.build
           echo "已成功跳过工具链!"
         else
           echo "缓存丢失!"
         fi
-
         # 清理旧缓存（需要 GITHUB_TOKEN 权限）
         if [ "${{ steps.check-cache.outputs.cache-hit }}" != 'true' ]; then
           gh cache list --key "${{ env.TARGET }}-${{ env.REPO_BRANCH }}" | cut -f 1 | xargs -r -n 1 gh cache delete || true
@@ -116,7 +110,6 @@ jobs:
         # golang update
         rm -rf feeds/packages/lang/golang
         git clone https://github.com/sbwml/packages_lang_golang feeds/packages/lang/golang
-  
         ./scripts/feeds install -a && ./scripts/feeds install -a && ./scripts/feeds install -a
 
     - name: 加载自定义配置
@@ -170,13 +163,6 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
-    - name: 上传 bin 目录
-      uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
-      with:
-        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
-
     - name: 整理固件文件
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
@@ -192,36 +178,13 @@ jobs:
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
-
-    - name: 上传固件至 cowtransfer
-      id: cowtransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-        # echo "{url}={$(cat cowtransfer.log | grep https | cut -f3 -d" ")}" >> $GITHUB_OUTPUT
-        echo "::set-output name=url::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
-        
-    - name: 上传固件至 WeTransfer
-      id: wetransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
-        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
-        # echo "{url}={$(cat wetransfer.log | grep https | cut -f3 -d" ")}" >> $GITHUB_OUTPUT
-        echo "::set-output name=url::$(cat wetransfer.log | grep https | cut -f3 -d" ")"
         
     - name: 生成 Release 标签
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
-        # 使用现代标准的 $GITHUB_OUTPUT 语法传递变量
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         touch release.txt
-        [ "${{ env.UPLOAD_COWTRANSFER }}" = "true" ] && echo "🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
-        [ "${{ env.UPLOAD_WETRANSFER }}" = "true" ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
         
     - name: 发布固件到 Release
