@@ -22,7 +22,6 @@ on:
 env:
   REPO_URL: https://github.com/Yuzhii0718/immortalwrt-mt798x-6.6-padavanonly
   REPO_BRANCH: 'openwrt-24.10-6.6'
-  REPO_TAG: v23.05.3
   TARGET: Redmi-AX6000
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
