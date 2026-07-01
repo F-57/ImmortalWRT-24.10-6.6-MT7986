@@ -77,7 +77,7 @@ jobs:
           ./openwrt/staging_dir/tool*
 
     - name: 维护与更新缓存
-      if: !cancelled()
+      if: ${{ !cancelled() }}
       run: |      
         if [ -d "./openwrt/staging_dir" ]; then
           find "./openwrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
