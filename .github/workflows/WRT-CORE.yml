@@ -88,12 +88,7 @@ jobs:
         else
           echo "缓存丢失!"
         fi
-        # 清理旧缓存（需要 GITHUB_TOKEN 权限）
-        if [ "${{ steps.check-cache.outputs.cache-hit }}" != 'true' ]; then
-          gh cache list --key "${{ env.TARGET }}-${{ env.REPO_BRANCH }}" | cut -f 1 | xargs -r -n 1 gh cache delete || true
-          echo "旧缓存清理完毕!"
-        fi
-        
+    
     - name: 加载自定义插件源
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
