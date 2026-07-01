@@ -79,7 +79,6 @@ jobs:
           ./openwrt/.ccache
           ./openwrt/staging_dir/host*
           ./openwrt/staging_dir/tool*
-        save-always: true
 
     - name: 维护与更新缓存
       if: env.WRT_TEST != 'true' && !cancelled()
@@ -159,17 +158,17 @@ jobs:
       if: github.event.inputs.ssh  != 'true'
       run: |
         cd openwrt
-        
         echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 || make -j1 V=s
-        
-        
-        # echo -e "1 thread compile"
-        # make -j1 || make -j1 V=s
-
+        # make -j$(nproc) || make -j1 || make -j1 V=s
+        # 1. 向 OUTPUT 传递成功状态
         echo "status=success" >> $GITHUB_OUTPUT
-        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME        
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=$(cat DEVICE_NAME)" >> $GITHUB_ENV 
+        # 2. 严谨抓取设备名：强制只取第 1 行，并强制剔除所有换行符(\r\n)和空格
+        TARGET_DEVICE=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' | head -n 1 | tr -d '\r\n ' )
+        # 3. 严格按照 KEY=VALUE 格式写入环境变量，确保万无一失
+        if [ -n "$TARGET_DEVICE" ]; then
+            echo "DEVICE_NAME=_$TARGET_DEVICE" >> $GITHUB_ENV
+        fi
+        # 4. 写入时间戳
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
     - name: 检查磁盘空间占用
