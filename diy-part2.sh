@@ -63,6 +63,7 @@ function git_sparse_clone() {
 # --- 插件集成 ---
 git_sparse_clone main https://github.com/F-57/luci-app luci-app-adguardhome airconnect luci-app-airconnect
 git_sparse_clone main https://github.com/sirpdboy/luci-app-lucky lucky luci-app-lucky
+git clone --depth 1 https://github.com/eamonxg/luci-theme-shadcn package/luci-theme-shadcn
 git clone --depth 1 https://github.com/eamonxg/luci-theme-aurora package/luci-theme-aurora
 git clone --depth 1 https://github.com/eamonxg/luci-app-aurora-config package/luci-app-aurora-config
 git clone --depth 1 https://github.com/vernesong/openclash.git OpenClash
@@ -119,8 +120,7 @@ CONFIG_TARGET_ROOTFS_INITRAMFS=n
 CONFIG_LUCI_LANG_en=y
 CONFIG_LUCI_LANG_zh_Hans=y
 CONFIG_PACKAGE_kmod-mtd-rw=y
-CONFIG_PACKAGE_luci-theme-aurora=y
-CONFIG_PACKAGE_luci-app-aurora-config=y
+CONFIG_PACKAGE_luci-theme-shadcn=y
 CONFIG_PACKAGE_luci-app-lucky=y
 CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-app-adguardhome=y
