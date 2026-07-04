@@ -43,7 +43,10 @@ else
 fi
 
 # 删除系统预制包
+rm -rf feeds/luci/applications/luci-app-adguardhome
 rm -rf feeds/luci/applications/luci-app-openclash
+rm -rf feeds/packages/lang/golang
+rm -rf feeds/packages/net/v2ray-geodata
 
 # Git稀疏克隆，只克隆指定目录到本地
 function git_sparse_clone() {
@@ -63,10 +66,13 @@ function git_sparse_clone() {
 # --- 插件集成 ---
 git_sparse_clone main https://github.com/F-57/luci-app luci-app-adguardhome airconnect luci-app-airconnect
 git_sparse_clone main https://github.com/sirpdboy/luci-app-lucky lucky luci-app-lucky
-git clone --depth 1 https://github.com/eamonxg/luci-theme-shadcn package/luci-theme-shadcn
-git clone --depth 1 https://github.com/eamonxg/luci-theme-aurora package/luci-theme-aurora
-git clone --depth 1 https://github.com/eamonxg/luci-app-aurora-config package/luci-app-aurora-config
-git clone --depth 1 https://github.com/vernesong/openclash.git OpenClash
+git clone https://github.com/eamonxg/luci-theme-shadcn package/luci-theme-shadcn
+git clone https://github.com/eamonxg/luci-theme-aurora package/luci-theme-aurora
+git clone https://github.com/eamonxg/luci-app-aurora-config package/luci-app-aurora-config
+git clone https://github.com/sbwml/packages_lang_golang -b 26.x feeds/packages/lang/golang
+git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+git clone https://github.com/vernesong/openclash.git OpenClash
 mv OpenClash/luci-app-openclash feeds/luci/applications/luci-app-openclash
 rm -rf OpenClash
 
@@ -89,6 +95,7 @@ change_name "feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po" "UPnP IGD
 change_name "feeds/luci/applications/luci-app-openclash/po/zh-cn/openclash.zh-cn.po" "OpenClash" "科学上网"
 change_name "package/luci-app-lucky/po/zh_Hans/lucky.po" "Lucky" "路由助手"
 change_name "package/luci-app-aurora-config/po/zh_Hans/aurora-config.po" "Aurora Settings" "主题设置"
+# change_name "package/mosdns/luci-app-mosdns/po/zh_Hans/mosdns.po" "MosDNS" "DNS分流"
 
 #修复Rust编译失败
 RUST_FILE=$(find feeds/packages/lang/rust/ -maxdepth 2 -type f -name "Makefile" 2>/dev/null)
