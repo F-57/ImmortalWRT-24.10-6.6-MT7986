@@ -96,6 +96,7 @@ change_name "feeds/luci/applications/luci-app-openclash/po/zh-cn/openclash.zh-cn
 change_name "package/luci-app-lucky/po/zh_Hans/lucky.po" "Lucky" "路由助手"
 change_name "package/luci-app-aurora-config/po/zh_Hans/aurora-config.po" "Aurora Settings" "主题设置"
 change_name "package/mosdns/luci-app-mosdns/po/zh_Hans/mosdns.po" "MosDNS" "域名分流"
+change_name "feeds/luci/applications/luci-app-mwan3/po/zh_Hans/mwan3.po" "MultiWAN Manager" "负载均衡"
 
 #修复Rust编译失败
 RUST_FILE=$(find feeds/packages/lang/rust/ -maxdepth 2 -type f -name "Makefile" 2>/dev/null)
@@ -133,4 +134,5 @@ CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-app-adguardhome=y
 CONFIG_PACKAGE_luci-app-airconnect=y
 CONFIG_PACKAGE_luci-app-mosdns=y
+CONFIG_PACKAGE_luci-app-mwan3=y
 EOF
