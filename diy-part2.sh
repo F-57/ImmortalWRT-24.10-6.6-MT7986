@@ -98,6 +98,7 @@ change_name "package/luci-app-lucky/po/zh_Hans/lucky.po" "Lucky" "路由助手"
 change_name "package/luci-app-aurora-config/po/zh_Hans/aurora-config.po" "Aurora Settings" "主题设置"
 change_name "package/mosdns/luci-app-mosdns/po/zh_Hans/mosdns.po" "MosDNS" "域名分流"
 change_name "feeds/luci/applications/luci-app-mwan3/po/zh_Hans/mwan3.po" "MultiWAN Manager" "负载均衡"
+change_name "package/luci-app-tailscale/po/zh_Hans/tailscale.po" "Tailscale" "异地组网"
 
 #修复Rust编译失败
 RUST_FILE=$(find feeds/packages/lang/rust/ -maxdepth 2 -type f -name "Makefile" 2>/dev/null)
