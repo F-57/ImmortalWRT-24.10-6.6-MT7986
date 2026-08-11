@@ -70,6 +70,7 @@ git clone https://github.com/eamonxg/luci-theme-shadcn package/luci-theme-shadcn
 git clone https://github.com/eamonxg/luci-theme-aurora package/luci-theme-aurora
 git clone https://github.com/eamonxg/luci-app-aurora-config package/luci-app-aurora-config
 git clone https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
+git clone https://github.com/zzsj0928/luci-app-pushbot package/luci-app-pushbot
 git clone https://github.com/sbwml/packages_lang_golang -b 26.x feeds/packages/lang/golang
 git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
@@ -138,4 +139,5 @@ CONFIG_PACKAGE_luci-app-airconnect=y
 CONFIG_PACKAGE_luci-app-mosdns=y
 CONFIG_PACKAGE_luci-app-mwan3=y
 CONFIG_PACKAGE_luci-app-tailscale=y
+CONFIG_PACKAGE_luci-app-pushbot=y
 EOF
