@@ -71,6 +71,7 @@ git clone https://github.com/eamonxg/luci-theme-aurora package/luci-theme-aurora
 git clone https://github.com/eamonxg/luci-app-aurora-config package/luci-app-aurora-config
 git clone https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
 git clone https://github.com/zzsj0928/luci-app-pushbot package/luci-app-pushbot
+git clone https://github.com/nikkinikki-org/OpenWrt-nikki package/OpenWrt-nikki
 git clone https://github.com/sbwml/packages_lang_golang -b 26.x feeds/packages/lang/golang
 git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
@@ -100,6 +101,7 @@ change_name "package/luci-app-aurora-config/po/zh_Hans/aurora-config.po" "Aurora
 change_name "package/mosdns/luci-app-mosdns/po/zh_Hans/mosdns.po" "MosDNS" "域名分流"
 change_name "feeds/luci/applications/luci-app-mwan3/po/zh_Hans/mwan3.po" "MultiWAN Manager" "负载均衡"
 change_name "package/luci-app-tailscale/po/zh_Hans/tailscale.po" "Tailscale" "异地组网"
+change_name "package/OpenWrt-nikki/luci-app-nikki/po/zh_Hans/nikki.po" "Nikki" "透明代理"
 
 #修复Rust编译失败
 RUST_FILE=$(find feeds/packages/lang/rust/ -maxdepth 2 -type f -name "Makefile" 2>/dev/null)
