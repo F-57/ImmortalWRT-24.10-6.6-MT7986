@@ -142,4 +142,5 @@ CONFIG_PACKAGE_luci-app-mosdns=y
 CONFIG_PACKAGE_luci-app-mwan3=y
 CONFIG_PACKAGE_luci-app-tailscale=y
 CONFIG_PACKAGE_luci-app-pushbot=y
+CONFIG_PACKAGE_luci-app-nikki=y
 EOF
